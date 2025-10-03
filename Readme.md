@@ -34,3 +34,6 @@ streamlit run app.py
    + Copy/Paste the prompt to your AI.
    + Enable reasoning and web search, and let your AI generate the report.
      + Gemini 2.5 Pro is highly recommended.
+
+## Disclaimer
+This dashboard is provided strictly for educational and informational purposes and does not constitute financial, investment, legal, tax, or other professional advice, a recommendation, or a solicitation to buy or sell any security. Data and calculations may be incomplete, delayed, or inaccurate, and all content is provided on an “as is” and “as available” basis without warranties of any kind. You are solely responsible for your investment decisions and for independently verifying any information before acting. Past performance is not indicative of future results; investing involves risk, including the possible loss of principal. To the fullest extent permitted by applicable law, the developer, contributors, and affiliates disclaim all liability for any direct, indirect, incidental, consequential, or special damages (including trading losses or lost profits) arising from or related to your access to or use of this dashboard. By using this dashboard, you acknowledge and agree to these terms and should consult a licensed financial professional before making any investment decisions.”
