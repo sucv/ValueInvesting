@@ -21,8 +21,10 @@ from core.constants import (
     FINANCIALS,
     DERIVED_METRICS,
     STOCK_INFO,
+    KEY_RATIO_DICT
     # key-ratio config
 )
+
 from utils.prompt_templates import PROMPT_TEMPLATE
 from core.macros import MacroEconomic
 from core.evaluation import Evaluator
@@ -540,7 +542,7 @@ def build_radar_chart(radar_labels: List[str], radar_values: List[float], *, hei
 # =============================================================================
 # Sections (Key ratios, News tabs, Evaluation, Valuation, Facts)
 # =============================================================================
-from core.constants import KEY_RATIO_DICT  # ensure imported
+
 
 def build_key_ratios_from_config(stock_obj: Stock) -> List[Dict[str, Any]]:
     items: List[Dict[str, Any]] = []
