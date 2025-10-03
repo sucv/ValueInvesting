@@ -1,10 +1,11 @@
 ## Overview
 [Streamlit Host](https://valueinvest.streamlit.app)
 
-This is my personal dashboard for value investment. It is inspired or built upon the following resources:
+This is my personal dashboard for value investment. It support stocks from almost all the country (as long as you can quote them from Yahoo Finance). It is inspired or built upon the following resources:
 
 - The free Python library `yfinance`for accessing the internatial market data which are usually not free.
 - The Worldbank API for the Macroeconomics  evaluation.
+- The elegant snowflake chart from [SimplyWallst](https://simplywall.st/dashboard) and their [GitHub Repo](https://github.com/SimplyWallSt/Company-Analysis-Model).
 - The wonderful Udemy course [Value Investing Bootcamp: How to Invest Wisely](https://www.udemy.com/course/value-investing-bootcamp-how-to-invest-wisely/) and their materials.
 - The wonderful Udemy course [The Complete Financial Analyst Training & Investing Course](https://www.udemy.com/course/the-complete-financial-analyst-training-and-investing-course) and their materials.
 - The [GuruFocus](https://www.gurufocus.com/) and [Morningstar](https://www.morningstar.com/) for cross-validating my data and valuation results.
@@ -24,7 +25,7 @@ streamlit run app.py
    + You happen to be interested on some stocks and want to get a preliminary check.
 2. Get the stock's symbol in Yahoo Finance's standards.
     + US stocks are usually the symbol directly
-    + Non-us stocks have suffix, for example, stocks from Tokye Stock Exchange (TSE) are usually xxxx.T, with a suffix of `.T`, stocks from Shanghai SE are usually xxxxxx.SS, with a suffix of `.SS`.
+    + Non-us stocks have suffix, for example, stocks from Tokyo Stock Exchange (TSE) are usually xxxx.T, with a suffix of `.T`, stocks from Shanghai SE are usually xxxxxx.SS, with a suffix of `.SS`.
     + You may identify the proper suffix by querying your stock in [Yahoo Finance](https://finance.yahoo.com/).
 3. Input the symbol and click the Run button. Then enjoy the visualization.
 4. (Optional) Tweak the valuation parameters to whatever you see fit.

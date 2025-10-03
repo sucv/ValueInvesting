@@ -1596,7 +1596,7 @@ def main() -> None:
 
     with tab_prompts:
         st.subheader("Prompt")
-        st.caption("Copy and paste the Prompt to your AI to generate the final report. Enable reasoning and web search. Gemini 2.5pro is highly recommended.")
+        st.caption("Copy and paste the Prompt to your AI to generate the final report. Enable reasoning and web search (even the deep research if you like). Gemini 2.5pro is highly recommended.")
         if st.session_state.get("generated_prompt_text"):
             st.code(st.session_state["generated_prompt_text"], language=None)
         else:
