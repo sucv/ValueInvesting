@@ -58,10 +58,12 @@ st.markdown(
         --btn-secondary-text: #E6EEF7;
       }
 
-      .block-container { padding-top: 1.2rem; }
-      h1,h2,h3,h4 { color: var(--text); letter-spacing: 0.1px; }
+      /* Ensure overlays can float above siblings across the page */
+      .block-container { padding-top: 1.2rem; overflow: visible; }
+      [data-baseweb="tab-panel"] { overflow: visible; } /* Streamlit Tabs pane */
       .stTabs [data-baseweb="tab"] { background: transparent; color: var(--muted); }
       .stTabs [aria-selected="true"] { color: var(--text); border-bottom: 2px solid var(--accent); }
+      h1,h2,h3,h4 { color: var(--text); letter-spacing: 0.1px; }
 
       .app-card{
         background: var(--bg2);
@@ -69,8 +71,14 @@ st.markdown(
         border-radius: 16px;
         padding: 14px 16px;
         box-shadow: 0 0 0 1px rgba(255,255,255,0.02) inset;
-        isolation: isolate; /* ensure a clean stacking context for anything inside */
+        /* isolation: isolate;  <-- REMOVED to avoid trapping z-index inside each card */
+        position: relative;   /* needed so z-index applies */
+        z-index: 0;           /* default layering */
+        overflow: visible;    /* let tooltip overflow this card */
       }
+      /* Raise hovered card so its tooltip can overlay neighboring cards */
+      .app-card:hover { z-index: 100; }
+
       .app-card h3, .app-card h4{ margin: 0 0 6px 0; }
       .keyline{ height:1px; background: rgba(255,255,255,0.10); margin:10px 0; }
       .kv{ display:flex; align-items:baseline; gap:8px; margin:6px 0;}
@@ -83,7 +91,7 @@ st.markdown(
       }
       .streamlit-expanderHeader { font-weight:600; }
 
-      .masonry { column-count: 3; column-gap: 18px; }
+      .masonry { column-count: 3; column-gap: 18px; overflow: visible; }
       @media (max-width: 1200px) { .masonry { column-count: 2; } }
       @media (max-width: 700px)  { .masonry { column-count: 1; } }
       .masonry .app-card {
@@ -108,6 +116,8 @@ st.markdown(
         display:grid;
         grid-template-columns: repeat(3, minmax(0,1fr));
         gap:18px;
+        position: relative;
+        overflow: visible; /* allow children to overflow visibly */
       }
       @media (max-width: 1100px){
         .card-grid{
@@ -163,9 +173,13 @@ st.markdown(
       }
       .help-tip::before{ content:"?"; }
 
-      /* lift the hovered icon so its bubble can sit on top of items from other rows */
+      /* lift the hovered icon and its parent card so bubble can sit on top of other cards */
       .help-tip:hover { z-index: 10000; }
-
+      .help-tip:focus { z-index: 10000; }
+        :root{
+          --tooltip-font-size: 0.95rem;
+          --tooltip-line-height: 1.55;
+        }
       .help-tip__bubble{
         display:none;
         position:absolute;
@@ -174,7 +188,7 @@ st.markdown(
         transform: translateX(-50%);
         min-width: 240px;
         max-width: 520px;
-        background: var(--tooltip-bg);     /* opaque background blocks content behind */
+        background: var(--tooltip-bg);
         border: 1px solid var(--tooltip-border);
         border-radius: 10px;
         padding: 10px 12px;
@@ -184,13 +198,15 @@ st.markdown(
         text-align: left;
         white-space: normal;
         overflow-wrap: anywhere;
+        pointer-events: auto;
+        font-size: var(--tooltip-font-size);
+        line-height: var(--tooltip-line-height);
       }
       .help-tip:hover .help-tip__bubble{ display:block; }
-
-      /* Touch-friendly: show on focus/tap; bigger hitbox on phones; keep within viewport */
       .help-tip:focus .help-tip__bubble,
       .help-tip:focus-within .help-tip__bubble{ display:block; }
-      .help-tip:focus{ box-shadow: 0 0 0 2px rgba(95,227,185,0.5) inset; }
+
+      /* Touch-friendly: keep within viewport */
       @media (hover: none){
         .help-tip__bubble{ max-width: 90vw; }
       }
@@ -283,8 +299,18 @@ def ensure_default_param_keys() -> None:
 # =============================================================================
 @st.cache_resource(show_spinner=False)
 def fetch_stock(ticker_symbol: str) -> Stock:
+    """Fetch Stock object with basic validation; raise ValueError if no price history."""
     data = yf.Ticker(ticker_symbol)
     prices = yf.download(tickers=[ticker_symbol], interval="1d", period="10y")
+
+    # Validate data
+    if not isinstance(prices, pd.DataFrame) or prices.empty or ("Close" not in prices.columns):
+        raise ValueError(
+            f"No price data returned for '{ticker_symbol}'. "
+            "Please double-check the ticker symbol. For non-US listings, use Yahoo Finance’s suffix format, e.g.: "
+            "Japan: 9697.T   Poland: CDR.WA   Hong Kong: 0700.HK   London: ULVR.L"
+        )
+
     return Stock(data=data, prices=prices)
 
 def run_evaluation_only() -> Dict[str, Any]:
@@ -1025,8 +1051,8 @@ def render_left_panel() -> Tuple[str, Dict[str, Any], bool, bool]:
             value=st.session_state.get("last_ticker", "AAPL") if st.session_state.get("last_ticker") else "AAPL",
             help=(
                 "Type a ticker (e.g., AAPL, MSFT) and press Run. "
-                "For non-US stocks, please refer to Yahoo Finance. For example, 9697.T is Capcom from Japan, "
-                "CDR.WA is the CD Projekt from Poland."
+                "For non-US stocks, please refer to Yahoo Finance. For example, 9697.T (Japan), "
+                "CDR.WA (Poland), 0700.HK (Hong Kong), ULVR.L (London)."
             ),
         )
 
@@ -1355,39 +1381,50 @@ def main() -> None:
 
     # Run pipeline
     if run_pressed:
-        if (st.session_state.stock is None) or ticker_changed:
-            with st.spinner("Fetching stock & building evaluation…"):
-                stock = fetch_stock(ticker_symbol)
-                st.session_state.stock = stock
+        try:
+            if (st.session_state.stock is None) or ticker_changed:
+                with st.spinner("Fetching stock & building evaluation…"):
+                    stock = fetch_stock(ticker_symbol)
+                    st.session_state.stock = stock
 
-                evaluation_payload = run_evaluation_only()
-                val = Valuation(stock)
-                val_params = val.get_valuation_params()
+                    evaluation_payload = run_evaluation_only()
+                    val = Valuation(stock)
+                    val_params = val.get_valuation_params()
 
-                st.session_state["_pending_param_keys"] = {
-                    "discount_rate": float(val_params["discount_rate"]),
-                    "growth_rate": float(val_params["growth_rate"]),
-                    "decline_rate": float(val_params["decline_rate"]),
-                    "terminal_growth_rate": float(val_params["terminal_growth_rate"]),
-                    "margin_of_safety": float(val_params["margin_of_safety"]),
-                    "n_years1": int(val_params["n_years1"]),
-                    "n_years2": int(val_params["n_years2"]),
-                    "risk_free_rate": float(val_params["risk_free_rate"]),
-                    "average_market_return": float(val_params["average_market_return"]),
-                }
+                    st.session_state["_pending_param_keys"] = {
+                        "discount_rate": float(val_params["discount_rate"]),
+                        "growth_rate": float(val_params["growth_rate"]),
+                        "decline_rate": float(val_params["decline_rate"]),
+                        "terminal_growth_rate": float(val_params["terminal_growth_rate"]),
+                        "margin_of_safety": float(val_params["margin_of_safety"]),
+                        "n_years1": int(val_params["n_years1"]),
+                        "n_years2": int(val_params["n_years2"]),
+                        "risk_free_rate": float(val_params["risk_free_rate"]),
+                        "average_market_return": float(val_params["average_market_return"]),
+                    }
 
-                st.session_state.evaluation_payload = evaluation_payload
-                st.session_state.last_ticker = ticker_symbol
+                    st.session_state.evaluation_payload = evaluation_payload
+                    st.session_state.last_ticker = ticker_symbol
 
-                override_params = {**val_params, **override_params}
+                    override_params = {**val_params, **override_params}
 
-        with st.spinner("Computing valuations…"):
-            st.session_state.fair_value_payload = run_valuation_only(st.session_state.stock, override_params)
+            with st.spinner("Computing valuations…"):
+                st.session_state.fair_value_payload = run_valuation_only(st.session_state.stock, override_params)
 
-        # Mark that Run has been completed for current ticker
-        st.session_state.has_run = True
+            # Mark that Run has been completed for current ticker
+            st.session_state.has_run = True
 
-        st.rerun()
+            st.rerun()
+
+        except ValueError as e:
+            # Invalid / unknown ticker or no data returned — inform user clearly
+            st.error(str(e))
+            st.session_state.has_run = False
+            return
+        except Exception as e:
+            st.error(f"Failed to fetch or compute for '{ticker_symbol}'. Please try again. Details: {e}")
+            st.session_state.has_run = False
+            return
 
     # Handle Generate Prompt click — build prompt and notify
     if gen_prompt_pressed and st.session_state.get("has_run", False) and st.session_state.stock is not None:
@@ -1395,7 +1432,10 @@ def main() -> None:
             stock_obj = st.session_state.stock
             # Prepare data used by Fact Sheet tables (and for prompt)
             prepared = prepare_fact_sheet_data(stock_obj)
-            key_ratios_payload = (stock_obj.to_payload() or {}).get("key_ratios", [])
+            try:
+                key_ratios_payload = (stock_obj.to_payload() or {}).get("key_ratios", [])
+            except Exception:
+                key_ratios_payload = []
             fair_values = st.session_state.fair_value_payload or {}
             evaluation_payload = st.session_state.evaluation_payload or {}
 
