@@ -310,9 +310,11 @@ def ensure_default_param_keys() -> None:
     st.session_state.setdefault("url_10k", "https://example.com/10k.pdf")
     st.session_state.setdefault("url_10q", "https://example.com/10q.pdf")
     st.session_state.setdefault("url_extra", "https://example.com/extra")
+    st.session_state.setdefault("_show_prompt_success", False)
 
     # error banner holder
     st.session_state.setdefault("_top_error", "")
+
 
 # =============================================================================
 # Fetch & compute
@@ -1398,6 +1400,7 @@ def main() -> None:
     ticker_changed = (st.session_state.last_ticker != ticker_symbol)
     if ticker_changed:
         st.session_state.has_run = False
+        st.session_state["_show_prompt_success"] = False
 
     # Run pipeline
     if run_pressed:
@@ -1425,6 +1428,7 @@ def main() -> None:
 
                     st.session_state.evaluation_payload = evaluation_payload
                     st.session_state.last_ticker = ticker_symbol
+                    st.session_state["_show_prompt_success"] = False
 
                     override_params = {**val_params, **override_params}
 
@@ -1447,6 +1451,7 @@ def main() -> None:
             # ensure state is consistent
             st.session_state.stock = None
             st.session_state.fair_value_payload = None
+            st.session_state["_show_prompt_success"] = False
 
         except Exception as e:
             msg = f"Failed to fetch or compute for '{ticker_symbol}'. Please try again. Details: {e}"
@@ -1455,10 +1460,17 @@ def main() -> None:
             st.session_state.has_run = False
             st.session_state.stock = None
             st.session_state.fair_value_payload = None
+            st.session_state["_show_prompt_success"] = False
 
     # Title and top-of-page notices (always visible and below the deploy banner)
     st.title("Value Investing Dashboard")
+
+    # Success message for prompt generation — pinned right under the title
+    if st.session_state.get("_show_prompt_success"):
+        st.success("✅ Prompt generated. Open the **Prompts** tab to copy it.")
+
     insert_vertical_row_spacing(6)
+
     _top_error = st.session_state.get("_top_error", "")
     if _top_error:
         st.error(_top_error)
@@ -1494,6 +1506,33 @@ def main() -> None:
 
     fair_values = st.session_state.fair_value_payload
     evaluation_payload = st.session_state.evaluation_payload or {}
+
+    # Handle "Generate Prompt" click from the sidebar
+    if gen_prompt_pressed:
+        try:
+            prepared_fact_data = prepare_fact_sheet_data(stock_obj)
+            key_ratios_payload = (payload or {}).get("key_ratios", []) or build_key_ratios_from_config(stock_obj)
+            url_map_for_prompt = {
+                "10-K": st.session_state.get("url_10k", ""),
+                "10-Q": st.session_state.get("url_10q", ""),
+                "Extra": st.session_state.get("url_extra", ""),
+            }
+
+            prompt_text_built = collect_prompt_text(
+                stock_obj=stock_obj,
+                prepared_fact_data=prepared_fact_data,
+                evaluation_payload=evaluation_payload,
+                fair_values=fair_values,
+                key_ratios_payload=key_ratios_payload,
+                url_map=url_map_for_prompt,
+            )
+
+            st.session_state["generated_prompt_text"] = prompt_text_built
+            st.session_state["_show_prompt_success"] = True  # <— mark to show notice under title
+
+        except Exception as e:
+            st.session_state["_show_prompt_success"] = False
+            st.error(f"Failed to generate prompt. Details: {e}")
 
     with tab_overview:
         col_price_chart, col_radar_chart, col_checklist = st.columns([0.4, 0.3, 0.3], gap="large")

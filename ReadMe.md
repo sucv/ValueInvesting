@@ -29,12 +29,21 @@ streamlit run app.py
 3. Input the symbol and click the Run button. Then enjoy the visualization.
 4. (Optional) Tweak the valuation parameters to whatever you see fit.
 5. (If you want to generate a report using your AI):
-   + Find the latest 10-K or 10-Q pdf urls from the target stock's investor relation page.
+   + Find the latest 10-K or 10-Q pdf urls from the target stock's investor relation page. 
    + Put the url in the Fiscal Report URLs fields.
    + Click Generate Prompt
    + Copy/Paste the prompt to your AI.
-   + Enable reasoning and web search, and let your AI generate the report.
-     + Gemini 2.5 Pro is highly recommended.
+   + Enable reasoning and web search (Or even the deep research), and let your AI generate the report.
+     + Gemini 2.5 Pro is highly recommended. The report generated is much better than that from GPT5-Thinking (both not using deep research).
+
+## Valuation Models
+
+There are 7 valuation models, including the Price Earning Multiple (PEM), 1-Stage Discounted Cash Flow (DCF-1), 2-Stage Discounted Cash Flow (DCF-2), Return on Equity (ROE), 2-Stage Discounted Dividend Model (DDM), Excess Return (ER), and Graham Number (GN). See in the app or  the `VALUATION` variable from the `constants.py` for formula.
+
+## Evaluation Checklist
+
+The app evaluate a stock from 6 aspects, including Past, Current, Feature, Health, Dividend, and Macroeconomics. If you provided the 10-K/10-Q urls, the 7th aspects shall be evaluated using your AI with the generated prompt. See in the app or the `CRITERION` variable from the `evaluation.py` for actual criteria.
+
 
 ## Disclaimer
 This dashboard is provided strictly for educational and informational purposes and does not constitute financial, investment, legal, tax, or other professional advice, a recommendation, or a solicitation to buy or sell any security. Data and calculations may be incomplete, delayed, or inaccurate, and all content is provided on an “as is” and “as available” basis without warranties of any kind. You are solely responsible for your investment decisions and for independently verifying any information before acting. Past performance is not indicative of future results; investing involves risk, including the possible loss of principal. To the fullest extent permitted by applicable law, the developer, contributors, and affiliates disclaim all liability for any direct, indirect, incidental, consequential, or special damages (including trading losses or lost profits) arising from or related to your access to or use of this dashboard. By using this dashboard, you acknowledge and agree to these terms and should consult a licensed financial professional before making any investment decisions.”
