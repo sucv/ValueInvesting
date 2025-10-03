@@ -56,6 +56,10 @@ st.markdown(
         --btn-secondary-bg-hover: #324266;
         --btn-secondary-border: rgba(255,255,255,0.14);
         --btn-secondary-text: #E6EEF7;
+
+        /* Tooltip text controls */
+        --tooltip-font-size: 0.95rem;
+        --tooltip-line-height: 1.55;
       }
 
       /* Ensure overlays can float above siblings across the page */
@@ -71,7 +75,6 @@ st.markdown(
         border-radius: 16px;
         padding: 14px 16px;
         box-shadow: 0 0 0 1px rgba(255,255,255,0.02) inset;
-        /* isolation: isolate;  <-- REMOVED to avoid trapping z-index inside each card */
         position: relative;   /* needed so z-index applies */
         z-index: 0;           /* default layering */
         overflow: visible;    /* let tooltip overflow this card */
@@ -109,9 +112,7 @@ st.markdown(
 
       .row-spacer { height: 18px; }
 
-      /* ============
-         Card grids
-         ============ */
+      /* ============ Card grids ============ */
       .card-grid{
         display:grid;
         grid-template-columns: repeat(3, minmax(0,1fr));
@@ -130,22 +131,41 @@ st.markdown(
         }
       }
 
-      /* ============
-         Table wrap (horizontal scroll on small screens)
-         ============ */
+      /* ============ Table wrappers ============ */
       .table-wrap{
         width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
       }
+      /* by default, allow wrapping; numbers will be right-aligned inline */
       .table-wrap table{
         width: 100%;
-        min-width: 520px; /* prevents over-compression on phones */
+        border-collapse: collapse;
       }
       .table-wrap th, .table-wrap td{
         overflow-wrap: anywhere;
         word-break: normal;
-        white-space: nowrap; /* keep cells compact; numbers stay on one line */
+        white-space: normal; /* allow text to wrap */
+      }
+
+      /* Compact tables for Key Ratios / Fair Value / Basic Info */
+      .compact-table{
+        table-layout: fixed;              /* stable column widths */
+        font-size: 0.94rem;
+      }
+      .compact-table th,
+      .compact-table td{
+        padding: 6px 8px;                 /* tighter padding */
+      }
+      .compact-table th:nth-child(1),
+      .compact-table td:nth-child(1){
+        width: 60%;                        /* name/metric column */
+      }
+      .compact-table th:nth-child(n+2),
+      .compact-table td:nth-child(n+2){
+        width: 40%;                        /* values */
+        text-align: right;
+        white-space: nowrap;               /* keep concise numbers on one line */
       }
 
       /* ===========================
@@ -176,18 +196,15 @@ st.markdown(
       /* lift the hovered icon and its parent card so bubble can sit on top of other cards */
       .help-tip:hover { z-index: 10000; }
       .help-tip:focus { z-index: 10000; }
-        :root{
-          --tooltip-font-size: 0.95rem;
-          --tooltip-line-height: 1.55;
-        }
+
       .help-tip__bubble{
         display:none;
         position:absolute;
         top: 24px;
         left: 50%;
         transform: translateX(-50%);
-        min-width: 240px;
-        max-width: 520px;
+        min-width: 320px;                 /* wider tooltip */
+        max-width: 720px;                 /* allow longer lines before wrapping */
         background: var(--tooltip-bg);
         border: 1px solid var(--tooltip-border);
         border-radius: 10px;
@@ -294,6 +311,9 @@ def ensure_default_param_keys() -> None:
     st.session_state.setdefault("url_10q", "https://example.com/10q.pdf")
     st.session_state.setdefault("url_extra", "https://example.com/extra")
 
+    # error banner holder
+    st.session_state.setdefault("_top_error", "")
+
 # =============================================================================
 # Fetch & compute
 # =============================================================================
@@ -382,9 +402,9 @@ def render_fair_value_table_card(current_price_float: float, fair_value_payload:
 
         table_rows_html += f"""
 <tr>
-  <td style="padding:10px 12px; border-bottom:1px solid var(--border);">{row_dict['Method']}</td>
-  <td style="padding:10px 12px; border-bottom:1px solid var(--border); text-align:right;">{format_compact_number(fv)}</td>
-  <td style="padding:10px 12px; border-bottom:1px solid var(--border); text-align:right;">{upside_html}</td>
+  <td style="padding:6px 8px; border-bottom:1px solid var(--border);">{row_dict['Method']}</td>
+  <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap;">{format_compact_number(fv)}</td>
+  <td style="padding:6px 8px; border-bottom:1px solid var(--border); text-align:right;">{upside_html}</td>
 </tr>
 """.strip()
 
@@ -397,16 +417,16 @@ def render_fair_value_table_card(current_price_float: float, fair_value_payload:
       <h4 style="margin-bottom:8px;">Fair Value</h4>
       {price_badge_html}
       <div class="table-wrap">
-        <table style="border-collapse:collapse; color:var(--text); font-size:0.95rem;">
+        <table class="compact-table" style="color:var(--text);">
           <thead>
             <tr>
-              <th style="text-align:left; padding:8px 12px; border-bottom:1px solid var(--border);">Method</th>
-              <th style="text-align:right; padding:8px 12px; border-bottom:1px solid var(--border);">Fair Value</th>
-              <th style="text-align:right; padding:8px 12px; border-bottom:1px solid var(--border);">Upside</th>
+              <th style="text-align:left; border-bottom:1px solid var(--border);">Method</th>
+              <th style="text-align:right; border-bottom:1px solid var(--border);">Fair Value</th>
+              <th style="text-align:right; border-bottom:1px solid var(--border);">Upside</th>
             </tr>
           </thead>
           <tbody>
-            {table_rows_html if table_rows_html else '<tr><td colspan="3" style="padding:12px; opacity:.8;">No fair value results.</td></tr>'}
+            {table_rows_html if table_rows_html else '<tr><td colspan="3" style="padding:10px; opacity:.8;">No fair value results.</td></tr>'}
           </tbody>
         </table>
       </div>
@@ -511,8 +531,8 @@ def render_key_ratios_card(key_ratios_payload: List[Dict[str, Any]]) -> None:
     for item in key_ratios_payload or []:
         table_rows_html += (
             "<tr>"
-            f"<td style='padding:8px 10px; border-bottom:1px solid var(--border); color:var(--text); width:56%; white-space: normal;'>{item.get('fancy_name', item.get('key', '—'))}</td>"
-            f"<td style='padding:8px 10px; border-bottom:1px solid var(--border); text-align:right; color:var(--text);'>{_fmt(item.get('value'), item.get('format', 'raw'))}</td>"
+            f"<td style='border-bottom:1px solid var(--border); color:var(--text);'>{item.get('fancy_name', item.get('key', '—'))}</td>"
+            f"<td style='border-bottom:1px solid var(--border); text-align:right; color:var(--text); white-space:nowrap;'>{_fmt(item.get('value'), item.get('format', 'raw'))}</td>"
             "</tr>"
         )
 
@@ -520,11 +540,11 @@ def render_key_ratios_card(key_ratios_payload: List[Dict[str, Any]]) -> None:
     <div class="app-card">
       <h4 style="margin-bottom:6px;">Key Ratios</h4>
       <div class="table-wrap">
-        <table style="border-collapse:collapse; color:var(--text); font-size:0.95rem;">
+        <table class="compact-table" style="color:var(--text);">
           <thead>
             <tr>
-              <th style="text-align:left; padding:6px 10px; border-bottom:1px solid var(--border); width:56%; white-space: normal;">Metric</th>
-              <th style="text-align:right; padding:6px 10px; border-bottom:1px solid var(--border);">Value</th>
+              <th style="text-align:left; border-bottom:1px solid var(--border);">Metric</th>
+              <th style="text-align:right; border-bottom:1px solid var(--border);">Value</th>
             </tr>
           </thead>
           <tbody>
@@ -645,16 +665,16 @@ def render_evaluation_checklist_card(evaluation_payload: Dict[str, Any], criteri
 
             body_rows_html_parts.append(
                 f"<tr>"
-                f"<td style='padding:8px 10px; border-bottom:1px solid var(--border); color:var(--text);'>{name_cell_html}</td>"
-                f"<td style='padding:8px 10px; border-bottom:1px solid var(--border); text-align:center; color:var(--text);'>{pass_fail_emoji}</td>"
+                f"<td style='border-bottom:1px solid var(--border); color:var(--text);'>{name_cell_html}</td>"
+                f"<td style='border-bottom:1px solid var(--border); text-align:center; color:var(--text); white-space:nowrap;'>{pass_fail_emoji}</td>"
                 f"</tr>"
             )
 
         while len(body_rows_html_parts) < 6:
             body_rows_html_parts.append(
                 "<tr>"
-                "<td style='padding:8px 10px; border-bottom:1px solid var(--border); color:var(--text); opacity:.5;'>—</td>"
-                "<td style='padding:8px 10px; border-bottom:1px solid var(--border); text-align:center; color:var(--text); opacity:.5;'>—</td>"
+                "<td style='border-bottom:1px solid var(--border); color:var(--text); opacity:.5;'>—</td>"
+                "<td style='border-bottom:1px solid var(--border); text-align:center; color:var(--text); opacity:.5;'>—</td>"
                 "</tr>"
             )
 
@@ -662,11 +682,11 @@ def render_evaluation_checklist_card(evaluation_payload: Dict[str, Any], criteri
         <div class="app-card">
           <h4 style="margin-bottom:8px;">Evaluation Checklist</h4>
           <div class="table-wrap">
-            <table style="border-collapse:collapse; color:var(--text); font-size:0.95rem;">
+            <table class="compact-table" style="color:var(--text);">
               <thead>
                 <tr>
-                  <th style="text-align:left; padding:6px 10px; border-bottom:1px solid var(--border);">Criterion</th>
-                  <th style="text-align:center; padding:6px 10px; border-bottom:1px solid var(--border);">Pass / Fail</th>
+                  <th style="text-align:left; border-bottom:1px solid var(--border);">Criterion</th>
+                  <th style="text-align:center; border-bottom:1px solid var(--border);">Pass / Fail</th>
                 </tr>
               </thead>
               <tbody>
@@ -920,19 +940,19 @@ def _render_scalar_table_card_html(table_title_text: str, mapping_name_to_value:
         display_name = name_map.get(metric_name, metric_name)
         table_rows_html += (
             "<tr>"
-            f"<td style='padding:8px 10px; border-bottom:1px solid var(--border); width:56%; white-space: normal;'>{display_name}</td>"
-            f"<td style='padding:8px 10px; border-bottom:1px solid var(--border); text-align:right;'>{_fmt_scalar_value_for_display(mapping_name_to_value[metric_name])}</td>"
+            f"<td style='border-bottom:1px solid var(--border); color:var(--text);'>{display_name}</td>"
+            f"<td style='border-bottom:1px solid var(--border); text-align:right; white-space:nowrap;'>{_fmt_scalar_value_for_display(mapping_name_to_value[metric_name])}</td>"
             "</tr>"
         )
     return textwrap_dedent(f"""
     <div class="app-card" style="max-width:600px; width:100%; display:inline-block;">
       <h4 style="margin-bottom:8px;">{table_title_text}</h4>
       <div class="table-wrap">
-        <table style="border-collapse:collapse; color:var(--text); font-size:0.95rem;">
+        <table class="compact-table" style="color:var(--text);">
         <thead>
           <tr>
-            <th style="text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); width:56%; white-space: normal;">Metric</th>
-            <th style="text-align:right; padding:8px 10px; border-bottom:1px solid var(--border);">Value</th>
+            <th style="text-align:left; border-bottom:1px solid var(--border);">Metric</th>
+            <th style="text-align:right; border-bottom:1px solid var(--border);">Value</th>
           </tr>
         </thead>
           <tbody>
@@ -958,7 +978,7 @@ def _render_series_table_card_html(table_title_text: str, mapping_metric_to_seri
 
     latest_five_timestamp_labels_desc: List[str] = sorted(all_timestamp_labels_set, reverse=True)[:5]
     header_cells_html = "".join(
-        f"<th style='text-align:right; padding:8px 10px; border-bottom:1px solid var(--border);'>{label}</th>"
+        f"<th style='text-align:right; padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap;'>{label}</th>"
         for label in latest_five_timestamp_labels_desc
     )
 
@@ -980,7 +1000,7 @@ def _render_series_table_card_html(table_title_text: str, mapping_metric_to_seri
         value_cells_html_parts = []
         for timestamp_label in latest_five_timestamp_labels_desc:
             value_cells_html_parts.append(
-                f"<td style='padding:8px 10px; border-bottom:1px solid var(--border); text-align:right;'>{_fmt_series_point(series_map_for_metric.get(timestamp_label))}</td>"
+                f"<td style='padding:8px 10px; border-bottom:1px solid var(--border); text-align:right; white-space:nowrap;'>{_fmt_series_point(series_map_for_metric.get(timestamp_label))}</td>"
             )
         body_rows_html += (
                 "<tr>"
@@ -1224,7 +1244,7 @@ def _format_officers_lines(officers: Optional[List[Any]]) -> str:
             lines.append(f"{name} — {title}")
         else:
             lines.append(f"{name}")
-    return "\n".join(lines)
+    return "\n".njoin(lines) if False else "\n".join(lines)
 
 def _format_evaluation_lines(evaluation_payload: Dict[str, Any]) -> str:
     """
@@ -1411,56 +1431,38 @@ def main() -> None:
             with st.spinner("Computing valuations…"):
                 st.session_state.fair_value_payload = run_valuation_only(st.session_state.stock, override_params)
 
+            # Clear any prior error on success
+            st.session_state["_top_error"] = ""
+
             # Mark that Run has been completed for current ticker
             st.session_state.has_run = True
 
             st.rerun()
 
         except ValueError as e:
-            # Invalid / unknown ticker or no data returned — inform user clearly
-            st.error(str(e))
+            # Capture the message and show a toast; render it later below the title
+            st.session_state["_top_error"] = str(e)
+            st.toast(str(e))
             st.session_state.has_run = False
-            return
+            # ensure state is consistent
+            st.session_state.stock = None
+            st.session_state.fair_value_payload = None
+
         except Exception as e:
-            st.error(f"Failed to fetch or compute for '{ticker_symbol}'. Please try again. Details: {e}")
+            msg = f"Failed to fetch or compute for '{ticker_symbol}'. Please try again. Details: {e}"
+            st.session_state["_top_error"] = msg
+            st.toast(msg)
             st.session_state.has_run = False
-            return
+            st.session_state.stock = None
+            st.session_state.fair_value_payload = None
 
-    # Handle Generate Prompt click — build prompt and notify
-    if gen_prompt_pressed and st.session_state.get("has_run", False) and st.session_state.stock is not None:
-        with st.spinner("Generating prompt…"):
-            stock_obj = st.session_state.stock
-            # Prepare data used by Fact Sheet tables (and for prompt)
-            prepared = prepare_fact_sheet_data(stock_obj)
-            try:
-                key_ratios_payload = (stock_obj.to_payload() or {}).get("key_ratios", [])
-            except Exception:
-                key_ratios_payload = []
-            fair_values = st.session_state.fair_value_payload or {}
-            evaluation_payload = st.session_state.evaluation_payload or {}
-
-            url_map = {
-                "10-K": st.session_state.get("url_10k", ""),
-                "10-Q": st.session_state.get("url_10q", ""),
-                "Extra": st.session_state.get("url_extra", ""),
-            }
-
-            prompt_text = collect_prompt_text(
-                stock_obj=stock_obj,
-                prepared_fact_data=prepared,
-                evaluation_payload=evaluation_payload,
-                fair_values=fair_values,
-                key_ratios_payload=key_ratios_payload,
-                url_map=url_map,
-            )
-            st.session_state.generated_prompt_text = prompt_text
-
-        st.session_state["_prompt_notice"] = "Prompt generated, see it in Tab Prompts"
-
+    # Title and top-of-page notices (always visible and below the deploy banner)
     st.title("Value Investing Dashboard")
-    _notice = st.session_state.pop("_prompt_notice", "")
-    if _notice:
-        st.success(_notice)
+    insert_vertical_row_spacing(6)
+    _top_error = st.session_state.get("_top_error", "")
+    if _top_error:
+        st.error(_top_error)
+        insert_vertical_row_spacing(8)
 
     if st.session_state.stock is None or st.session_state.fair_value_payload is None:
         st.info("Enter a ticker and click **Run** to load data.")
@@ -1523,7 +1525,7 @@ def main() -> None:
 
         insert_vertical_row_spacing(30)
 
-        colC, colD, colE = st.columns([0.30, 0.30, 0.4], gap="large")
+        colC, colD, colE = st.columns([0.20, 0.30, 0.5], gap="large")
         with colC:
             key_ratios_payload = (payload or {}).get("key_ratios", [])
             if not key_ratios_payload:
