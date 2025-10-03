@@ -295,6 +295,15 @@ def make_html_paragraph_safe(text: Optional[str]) -> str:
 # Param defaults
 # =============================================================================
 def ensure_default_param_keys() -> None:
+    # Check if we have pending params to apply (from previous run's calculation)
+    if "_apply_pending_params" in st.session_state and st.session_state["_apply_pending_params"]:
+        pending = st.session_state.get("_pending_params", {})
+        for key, value in pending.items():
+            st.session_state[key] = value
+        # Clear the flag
+        st.session_state["_apply_pending_params"] = False
+        st.session_state["_pending_params"] = {}
+
     st.session_state.setdefault("discount_rate", float(DEFAULT_PARAM_DICT["discount_rate"]))
     st.session_state.setdefault("growth_rate", float(DEFAULT_PARAM_DICT["growth_rate"]))
     st.session_state.setdefault("decline_rate", float(DEFAULT_PARAM_DICT["decline_rate"]))
@@ -304,7 +313,7 @@ def ensure_default_param_keys() -> None:
     st.session_state.setdefault("n_years2", int(DEFAULT_PARAM_DICT["n_years2"]))
     st.session_state.setdefault("risk_free_rate", float(DEFAULT_PARAM_DICT["risk_free_rate"]))
     st.session_state.setdefault("average_market_return", float(DEFAULT_PARAM_DICT["average_market_return"]))
-    st.session_state.setdefault("has_run", False)  # track if Run has been clicked for the current ticker
+    st.session_state.setdefault("has_run", False)
 
     # Defaults for URL inputs
     st.session_state.setdefault("url_10k", "https://example.com/10k.pdf")
@@ -318,19 +327,37 @@ def ensure_default_param_keys() -> None:
     st.session_state.setdefault("_show_prompt_success", False)
     st.session_state.setdefault("_top_error", "")
 
+    # Pending params storage
+    st.session_state.setdefault("_pending_params", {})
+    st.session_state.setdefault("_apply_pending_params", False)
+    st.session_state.setdefault("user_modified_params", set())
+
+
 def _on_run_clicked_reset_urls_if_ticker_changed() -> None:
     """Reset 10-K/10-Q/Extra to placeholders if ticker changed before URL inputs render."""
     current_typed_ticker = (st.session_state.get("ticker_input") or "").strip().upper()
     previous_ticker = st.session_state.get("last_ticker")
 
-    # Treat None -> something as a change as well
     if previous_ticker is None or current_typed_ticker != previous_ticker:
         st.session_state["url_10k"] = "https://example.com/10k.pdf"
         st.session_state["url_10q"] = "https://example.com/10q.pdf"
         st.session_state["url_extra"] = "https://example.com/extra"
-        # also clear any stale prompt/success flag
         st.session_state["generated_prompt_text"] = ""
         st.session_state["_show_prompt_success"] = False
+
+        # Reset user modifications on ticker change
+        st.session_state["user_modified_params"] = set()
+
+        # Reset all params to defaults so new ticker gets fresh calculation
+        st.session_state["discount_rate"] = float(DEFAULT_PARAM_DICT["discount_rate"])
+        st.session_state["growth_rate"] = float(DEFAULT_PARAM_DICT["growth_rate"])
+        st.session_state["decline_rate"] = float(DEFAULT_PARAM_DICT["decline_rate"])
+        st.session_state["terminal_growth_rate"] = float(DEFAULT_PARAM_DICT["terminal_growth_rate"])
+        st.session_state["margin_of_safety"] = float(DEFAULT_PARAM_DICT["margin_of_safety"])
+        st.session_state["n_years1"] = int(DEFAULT_PARAM_DICT["n_years1"])
+        st.session_state["n_years2"] = int(DEFAULT_PARAM_DICT["n_years2"])
+        st.session_state["risk_free_rate"] = float(DEFAULT_PARAM_DICT["risk_free_rate"])
+        st.session_state["average_market_return"] = float(DEFAULT_PARAM_DICT["average_market_return"])
 
 # =============================================================================
 # Fetch & compute
@@ -1432,23 +1459,53 @@ def main() -> None:
                     val = Valuation(stock)
                     val_params = val.get_valuation_params()
 
-                    st.session_state["_pending_param_keys"] = {
-                        "discount_rate": float(val_params["discount_rate"]),
-                        "growth_rate": float(val_params["growth_rate"]),
-                        "decline_rate": float(val_params["decline_rate"]),
-                        "terminal_growth_rate": float(val_params["terminal_growth_rate"]),
-                        "margin_of_safety": float(val_params["margin_of_safety"]),
-                        "n_years1": int(val_params["n_years1"]),
-                        "n_years2": int(val_params["n_years2"]),
-                        "risk_free_rate": float(val_params["risk_free_rate"]),
-                        "average_market_return": float(val_params["average_market_return"]),
-                    }
+                    # Determine which params to update on next rerun
+                    params_to_update = {}
+
+                    for param_key in ["discount_rate", "growth_rate", "decline_rate",
+                                      "terminal_growth_rate", "margin_of_safety", "n_years1",
+                                      "n_years2", "risk_free_rate", "average_market_return"]:
+
+                        current_value = st.session_state.get(param_key)
+                        default_value = DEFAULT_PARAM_DICT.get(param_key)
+                        calculated_value = val_params.get(param_key)
+
+                        # Check if user has modified this param from default
+                        user_modified = (current_value != default_value)
+
+                        if user_modified:
+                            # User changed it - track and use their value
+                            st.session_state["user_modified_params"].add(param_key)
+                            override_params[param_key] = current_value
+                        elif calculated_value is not None:
+                            # Use calculated value - store for next rerun
+                            if param_key in ["n_years1", "n_years2"]:
+                                calculated_value = int(calculated_value)
+                            else:
+                                calculated_value = float(calculated_value)
+
+                            params_to_update[param_key] = calculated_value
+                            override_params[param_key] = calculated_value
+                        else:
+                            # Fall back to current/default
+                            override_params[param_key] = current_value
+
+                    # Store params to apply on next rerun (after widgets are created)
+                    if params_to_update:
+                        st.session_state["_pending_params"] = params_to_update
+                        st.session_state["_apply_pending_params"] = True
 
                     st.session_state.evaluation_payload = evaluation_payload
                     st.session_state.last_ticker = ticker_symbol
                     st.session_state["_show_prompt_success"] = False
 
-                    override_params = {**val_params, **override_params}
+            else:
+                # Re-running for same ticker - use current session state values
+                # No need to recalculate, just update override_params from session state
+                for param_key in ["discount_rate", "growth_rate", "decline_rate",
+                                  "terminal_growth_rate", "margin_of_safety", "n_years1",
+                                  "n_years2", "risk_free_rate", "average_market_return"]:
+                    override_params[param_key] = st.session_state.get(param_key)
 
             with st.spinner("Computing valuations…"):
                 st.session_state.fair_value_payload = run_valuation_only(st.session_state.stock, override_params)
@@ -1462,11 +1519,9 @@ def main() -> None:
             st.rerun()
 
         except ValueError as e:
-            # Capture the message and show a toast; render it later below the title
             st.session_state["_top_error"] = str(e)
             st.toast(str(e))
             st.session_state.has_run = False
-            # ensure state is consistent
             st.session_state.stock = None
             st.session_state.fair_value_payload = None
             st.session_state["_show_prompt_success"] = False
