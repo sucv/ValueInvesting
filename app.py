@@ -310,11 +310,27 @@ def ensure_default_param_keys() -> None:
     st.session_state.setdefault("url_10k", "https://example.com/10k.pdf")
     st.session_state.setdefault("url_10q", "https://example.com/10q.pdf")
     st.session_state.setdefault("url_extra", "https://example.com/extra")
-    st.session_state.setdefault("_show_prompt_success", False)
+
+    # Ticker text input state
+    st.session_state.setdefault("ticker_input", "AAPL")
 
     # error banner holder
+    st.session_state.setdefault("_show_prompt_success", False)
     st.session_state.setdefault("_top_error", "")
 
+def _on_run_clicked_reset_urls_if_ticker_changed() -> None:
+    """Reset 10-K/10-Q/Extra to placeholders if ticker changed before URL inputs render."""
+    current_typed_ticker = (st.session_state.get("ticker_input") or "").strip().upper()
+    previous_ticker = st.session_state.get("last_ticker")
+
+    # Treat None -> something as a change as well
+    if previous_ticker is None or current_typed_ticker != previous_ticker:
+        st.session_state["url_10k"] = "https://example.com/10k.pdf"
+        st.session_state["url_10q"] = "https://example.com/10q.pdf"
+        st.session_state["url_extra"] = "https://example.com/extra"
+        # also clear any stale prompt/success flag
+        st.session_state["generated_prompt_text"] = ""
+        st.session_state["_show_prompt_success"] = False
 
 # =============================================================================
 # Fetch & compute
@@ -1070,7 +1086,7 @@ def render_left_panel() -> Tuple[str, Dict[str, Any], bool, bool]:
         st.markdown("### Ticker & Parameters")
         ticker_symbol_input: str = st.text_input(
             "Ticker Symbol",
-            value=st.session_state.get("last_ticker", "AAPL") if st.session_state.get("last_ticker") else "AAPL",
+            key="ticker_input",
             help=(
                 "Type a ticker (e.g., AAPL, MSFT) and press Run. "
                 "For non-US stocks, please refer to Yahoo Finance. For example, 9697.T (Japan), "
@@ -1092,7 +1108,12 @@ def render_left_panel() -> Tuple[str, Dict[str, Any], bool, bool]:
             average_market_return = st.number_input("Average Market Return", key="average_market_return", step=0.005, format="%.3f")
 
         # RUN button goes *below* the Valuation Parameters expander
-        run_button_pressed = st.button("Run", type="primary", use_container_width=True)
+        run_button_pressed = st.button(
+            "Run",
+            type="primary",
+            use_container_width=True,
+            on_click=_on_run_clicked_reset_urls_if_ticker_changed,  # ← add this
+        )
 
         insert_vertical_row_spacing(8)
 
@@ -1398,9 +1419,6 @@ def main() -> None:
 
     # Reset "has_run" if ticker text changed
     ticker_changed = (st.session_state.last_ticker != ticker_symbol)
-    if ticker_changed:
-        st.session_state.has_run = False
-        st.session_state["_show_prompt_success"] = False
 
     # Run pipeline
     if run_pressed:
