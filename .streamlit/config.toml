@@ -1,0 +1,24 @@
+[theme]
+base = "dark"
+
+# Palette
+primaryColor = "#5FE3B9"              # mint/teal accent for primary buttons/controls
+backgroundColor = "#0A1120"           # deep navy page background
+secondaryBackgroundColor = "#101A2E"  # card/container background
+textColor = "#E6EEF7"                 # high-contrast text
+
+# Typeface: use system UI sans (SF Pro on Apple platforms)
+font = "sans serif"
+
+# NOTE: Streamlit doesn't expose a "secondary button color" in config.
+# The secondary button is themed in app.py via CSS variables to complement this palette.
+
+[client]
+toolbarMode = "auto"                  # "auto" | "minimal" | "viewer"
+
+[browser]
+gatherUsageStats = false
+
+[server]
+enableXsrfProtection = true
+headless = true
