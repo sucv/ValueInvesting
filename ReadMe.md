@@ -6,7 +6,15 @@ A comprehensive personal dashboard for value investment analysis, supporting sto
 
 ## 🎯 Overview
 
-This dashboard provides professional-grade value investment analysis tools accessible to individual investors. It combines multiple valuation models, fundamental analysis metrics, and macroeconomic indicators to help you make informed investment decisions across international markets.
+This dashboard provides value investment analysis tools accessible to individual investors. It combines multiple valuation models, fundamental analysis metrics, and macroeconomic indicators to help you make informed investment decisions across international markets.
+
+![](figures/demo.jpg)
+
+1. Input your interested ticker
+2. See the fair prices, snowflake visualization, and key metrics
+3. Pull everything into a Prompt
+4. Copy/Paste to your AI
+5. Get the comprehensive analysis report!
 
 ## 🙏 Acknowledgments
 
@@ -60,7 +68,6 @@ streamlit run app.py
    - Click "Generate Prompt"
    - Use the prompt with your preferred AI assistant (Gemini 2.5 Pro/Flash recommended)
    - Enable reasoning and web search for comprehensive analysis
-   - 
 
 ## 💡 Valuation Models
 
