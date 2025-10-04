@@ -3,7 +3,7 @@
 
 This is my personal dashboard for value investment. It support stocks from almost all the country (as long as you can quote them from Yahoo Finance). It is inspired or built upon the following resources:
 
-- The free Python library `yfinance`for accessing the internatial market data which are usually not free.
+- The free Python library `yfinance`for accessing the international market data which are usually not free.
 - The Worldbank API for the Macroeconomics  evaluation.
 - The elegant snowflake chart from [SimplyWallst](https://simplywall.st/dashboard) and their [GitHub Repo](https://github.com/SimplyWallSt/Company-Analysis-Model).
 - The wonderful Udemy course [Value Investing Bootcamp: How to Invest Wisely](https://www.udemy.com/course/value-investing-bootcamp-how-to-invest-wisely/) and their materials.
@@ -43,7 +43,7 @@ There are 7 valuation models, including the Price Earning Multiple (PEM), 1-Stag
 
 ## Evaluation Checklist
 
-The app evaluate a stock from 6 aspects, including Past, Current, Feature, Health, Dividend, and Macroeconomics. If you provided the 10-K/10-Q urls, the 7th aspects shall be evaluated using your AI with the generated prompt. See in the app or the `CRITERION` variable from the `evaluation.py` for actual criteria.
+The app evaluate a stock from 6 aspects, including Past, Current, Feature, Health, Dividend, and Macroeconomics. If you provided the 10-K/10-Q urls, the 7th aspects, qualitatives, shall be evaluated using your AI with the generated prompt. See in the app or the `CRITERION` variable from the `evaluation.py` for actual criteria.
 
 
 ## Disclaimer
