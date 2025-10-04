@@ -29,6 +29,8 @@ macro_payload = macros.to_payload()
 eva = Evaluator(stock, macros)
 evaluation_payload = eva.run_all()
 
+print(0)
+
 
 
 
