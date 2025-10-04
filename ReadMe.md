@@ -1,50 +1,114 @@
-## Overview
-[Streamlit Host](https://valueinvest.streamlit.app)
+# Value Investment Dashboard
 
-This is my personal dashboard for value investment. It support stocks from almost all the country (as long as you can quote them from Yahoo Finance). It is inspired or built upon the following resources:
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://valueinvest.streamlit.app)
 
-- The free Python library `yfinance`for accessing the international market data which are usually not free.
-- The Worldbank API for the Macroeconomics  evaluation.
-- The elegant snowflake chart from [SimplyWallst](https://simplywall.st/dashboard) and their [GitHub Repo](https://github.com/SimplyWallSt/Company-Analysis-Model).
-- The wonderful Udemy course [Value Investing Bootcamp: How to Invest Wisely](https://www.udemy.com/course/value-investing-bootcamp-how-to-invest-wisely/) and their materials.
-- The wonderful Udemy course [The Complete Financial Analyst Training & Investing Course](https://www.udemy.com/course/the-complete-financial-analyst-training-and-investing-course) and their materials.
-- The [GuruFocus](https://www.gurufocus.com/) and [Morningstar](https://www.morningstar.com/) for cross-validating my data and valuation results.
-- ChatGPT for polishing my code.
+A comprehensive personal dashboard for value investment analysis, supporting stocks from global markets through Yahoo Finance integration.
 
-## Local Install and Run
+## 🎯 Overview
+
+This dashboard provides professional-grade value investment analysis tools accessible to individual investors. It combines multiple valuation models, fundamental analysis metrics, and macroeconomic indicators to help you make informed investment decisions across international markets.
+
+## 🙏 Acknowledgments
+
+This project builds upon excellent resources from the investment community:
+
+- **[yfinance](https://github.com/ranaroussi/yfinance)** - Free Python library for accessing international market data
+- **World Bank API** - Macroeconomic evaluation metrics
+- **[SimplyWallSt](https://simplywall.st/dashboard)** - Inspiration for the elegant snowflake chart visualization ([GitHub](https://github.com/SimplyWallSt/Company-Analysis-Model))
+- **Educational Resources:**
+  - [Value Investing Bootcamp: How to Invest Wisely](https://www.udemy.com/course/value-investing-bootcamp-how-to-invest-wisely/) (Udemy)
+  - [The Complete Financial Analyst Training & Investing Course](https://www.udemy.com/course/the-complete-financial-analyst-training-and-investing-course) (Udemy)
+- **Data Validation:** [GuruFocus](https://www.gurufocus.com/) and [Morningstar](https://www.morningstar.com/)
+- **Development Support:** ChatGPT for code optimization
+
+## 🚀 Quick Start
+
+### Installation
+
 ```bash
 pip install streamlit yfinance pandas numpy plotly
-streamlit run app.py 
 ```
 
-## Standard Workflow
+### Running the Application
 
-0. Understand what is [Value Investment](https://en.wikipedia.org/wiki/Value_investing).
-1. Find the stock you want
-   + Via a Screener, e.g., the [Yahoo Finance Screener](https://finance.yahoo.com/research-hub/screener/), with certain criteria you preferred, e.g., PE, market cap, 52-week loser, etc.
-   + You happen to be interested on some stocks and want to get a preliminary check.
-2. Get the stock's symbol in Yahoo Finance's standards.
-    + US stocks are usually the symbol directly
-    + Non-us stocks have suffix, for example, stocks from Tokyo Stock Exchange (TSE) are usually xxxx.T, with a suffix of `.T`, stocks from Shanghai SE are usually xxxxxx.SS, with a suffix of `.SS`.
-    + You may identify the proper suffix by querying your stock in [Yahoo Finance](https://finance.yahoo.com/).
-3. Input the symbol and click the Run button. Then enjoy the visualization.
-4. (Optional) Tweak the valuation parameters to whatever you see fit.
-5. (If you want to generate a report using your AI):
-   + Find the latest 10-K or 10-Q pdf urls from the target stock's investor relation page. 
-   + Put the url in the Fiscal Report URLs fields.
-   + Click Generate Prompt
-   + Copy/Paste the prompt to your AI.
-   + Enable reasoning and web search (Or even the deep research), and let your AI generate the report.
-     + Gemini 2.5 Pro is highly recommended. The report generated is much better than that from GPT5-Thinking (both not using deep research).
+```bash
+streamlit run app.py
+```
 
-## Valuation Models
+## 📊 Standard Workflow
 
-There are 7 valuation models, including the Price Earning Multiple (PEM), 1-Stage Discounted Cash Flow (DCF-1), 2-Stage Discounted Cash Flow (DCF-2), Return on Equity (ROE), 2-Stage Discounted Dividend Model (DDM), Excess Return (ER), and Graham Number (GN). See in the app or  the `VALUATION` variable from the `constants.py` for formula.
+### 1. **Discover Investment Opportunities**
+   - Use screeners like [Yahoo Finance Screener](https://finance.yahoo.com/research-hub/screener/) with your preferred criteria (P/E ratio, market cap, 52-week performance, etc.)
+   - Or analyze specific stocks that catch your interest
 
-## Evaluation Checklist
+### 2. **Find the Correct Stock Symbol**
+   - **US Stocks:** Use the ticker symbol directly (e.g., `AAPL`, `GOOGL`)
+   - **International Stocks:** Include the exchange suffix
+     - Tokyo Stock Exchange: `.T` (e.g., `7203.T` for Toyota)
+     - Shanghai Stock Exchange: `.SS` (e.g., `600000.SS`)
+     - Search on [Yahoo Finance](https://finance.yahoo.com/) to find the correct symbol
 
-The app evaluate a stock from 6 aspects, including Past, Current, Feature, Health, Dividend, and Macroeconomics. If you provided the 10-K/10-Q urls, the 7th aspects, qualitatives, shall be evaluated using your AI with the generated prompt. See in the app or the `CRITERION` variable from the `evaluation.py` for actual criteria.
+### 3. **Analyze the Stock**
+   - Enter the symbol and click "Run"
+   - Review the comprehensive visualizations and metrics
+   - Adjust valuation parameters based on your investment thesis
+   - If the stock price is still substantially lower than the estimated fair prices under "unrealistically strict" parameters (e.g., a 2% growth rate), it might be an investment opportunity.
 
+### 4. **Generate AI-Powered Reports** (Optional)
+   - Locate the latest 10-K or 10-Q reports from the company's investor relations page
+   - Add the PDF URLs to the "Fiscal Report URLs" field
+   - Click "Generate Prompt"
+   - Use the prompt with your preferred AI assistant (Gemini 2.5 Pro/Flash recommended)
+   - Enable reasoning and web search for comprehensive analysis
+   - 
 
-## Disclaimer
-This dashboard is provided strictly for educational and informational purposes and does not constitute financial, investment, legal, tax, or other professional advice, a recommendation, or a solicitation to buy or sell any security. Data and calculations may be incomplete, delayed, or inaccurate, and all content is provided on an “as is” and “as available” basis without warranties of any kind. You are solely responsible for your investment decisions and for independently verifying any information before acting. Past performance is not indicative of future results; investing involves risk, including the possible loss of principal. To the fullest extent permitted by applicable law, the developer, contributors, and affiliates disclaim all liability for any direct, indirect, incidental, consequential, or special damages (including trading losses or lost profits) arising from or related to your access to or use of this dashboard. By using this dashboard, you acknowledge and agree to these terms and should consult a licensed financial professional before making any investment decisions.”
+## 💡 Valuation Models
+
+The dashboard employs seven industry-standard valuation models:
+
+1. **Price Earnings Multiple (PEM)** - Relative valuation based on earnings
+2. **1-Stage Discounted Cash Flow (DCF-1)** - Single-stage growth DCF model
+3. **2-Stage Discounted Cash Flow (DCF-2)** - Two-stage growth DCF model
+4. **Return on Equity (ROE)** - Profitability-based valuation
+5. **2-Stage Discounted Dividend Model (DDM)** - Dividend-focused valuation
+6. **Excess Return (ER)** - Economic value added approach
+7. **Graham Number (GN)** - Benjamin Graham's value formula
+
+> Detailed formulas available in `constants.py` under the `VALUATION` variable
+
+## ✅ Comprehensive Evaluation Framework
+
+Stocks are evaluated across six dimensions:
+
+- **Past Performance** - Historical growth and consistency
+- **Current Position** - Present financial key ratios
+- **Future Prospects** - The recent financial momentum vs average yearly growth
+- **Financial Health** - Balance sheet strength and risk metrics
+- **Dividend Policy** - Dividend streak and stability
+- **Macroeconomic Context** - Economic environment and region trends
+
+When fiscal report URLs are provided, a seventh dimension is added:
+- **Qualitative Analysis** - AI-powered assessment of business strategy, competitive advantages, and management quality
+
+> Evaluation criteria details in `evaluation.py` under the `CRITERION` variable
+
+## 📚 Understanding Value Investing
+
+New to value investing? Start with the [fundamental concepts](https://en.wikipedia.org/wiki/Value_investing) pioneered by Benjamin Graham and Warren Buffett.
+
+## ⚠️ Disclaimer
+
+This dashboard is provided strictly for **educational and informational purposes** and does not constitute financial, investment, legal, tax, or other professional advice. It is not a recommendation or solicitation to buy or sell any security.
+
+**Important Notice:**
+- Data and calculations may be incomplete, delayed, or inaccurate
+- All content is provided "as is" without warranties of any kind
+- You are solely responsible for your investment decisions
+- Past performance does not indicate future results
+- Investing involves risk, including possible loss of principal
+
+The developers, contributors, and affiliates disclaim all liability for any damages arising from the use of this dashboard. **Always consult a licensed financial professional before making investment decisions.**
+
+---
+
+*By using this dashboard, you acknowledge and agree to these terms.*
