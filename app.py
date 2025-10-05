@@ -1938,8 +1938,8 @@ def main() -> None:
     )
 
     # Three tabs: Overview, Details (renamed from Fact Sheet), Prompts
-    tab_overview, tab_data, tab_valuation, tab_evaluation, tab_prompts = st.tabs(
-        ["Overview", "Data Points", "Valuation", "Evaluation", "Prompts"]
+    tab_overview, tab_data, tab_valuation, tab_evaluation, tab_prompts, tab_manual = st.tabs(
+        ["Overview", "Data Points", "Valuation", "Evaluation", "Prompts", "Manual"]
     )
 
     fair_values = st.session_state.fair_value_payload
@@ -2078,6 +2078,10 @@ def main() -> None:
             st.code(st.session_state["generated_prompt_text"], language=None)
         else:
             st.info("No prompt yet. Use the **Generate Prompt** button in the sidebar under **Fiscal Report URLs**.")
+
+    with tab_manual:
+        from utils.how_to_use import MANUAL_CONTENT
+        st.markdown(MANUAL_CONTENT)
 
 
 if __name__ == "__main__":
