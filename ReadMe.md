@@ -25,7 +25,7 @@ This project builds upon excellent resources from the investment community:
   - [Value Investing Bootcamp: How to Invest Wisely](https://www.udemy.com/course/value-investing-bootcamp-how-to-invest-wisely/) (Udemy)
   - [The Complete Financial Analyst Training & Investing Course](https://www.udemy.com/course/the-complete-financial-analyst-training-and-investing-course) (Udemy)
 - **Data Validation:** [GuruFocus](https://www.gurufocus.com/) and [Morningstar](https://www.morningstar.com/)
-- **Development Support:** ChatGPT for code optimization
+- **Development Support:** ChatGPT and Claude for code optimization
 
 ## 🚀 Quick Start
 
@@ -71,13 +71,13 @@ streamlit run app.py
 
 The dashboard employs seven industry-standard valuation models:
 
-1. **Price Earnings Multiple (PEM)** - Relative valuation based on earnings
-2. **1-Stage Discounted Cash Flow (DCF-1)** - Single-stage growth DCF model
-3. **2-Stage Discounted Cash Flow (DCF-2)** - Two-stage growth DCF model
-4. **Return on Equity (ROE)** - Profitability-based valuation
-5. **2-Stage Discounted Dividend Model (DDM)** - Dividend-focused valuation
-6. **Excess Return (ER)** - Economic value added approach
-7. **Graham Number (GN)** - Benjamin Graham's value formula
+1. **Price Earnings Multiple (PEM)**
+2. **1-Stage Discounted Cash Flow (DCF-1)**
+3. **2-Stage Discounted Cash Flow (DCF-2)**
+4. **Return on Equity (ROE)**
+5. **2-Stage Discounted Dividend Model (DDM)**
+6. **Excess Return (ER)**
+7. **Graham Number (GN)**
 
 > See in the dashboard for detailed calculation steps.
 
@@ -102,6 +102,13 @@ When fiscal report URLs are provided, a seventh dimension is added:
 New to value investing? Start with the [fundamental concepts](https://en.wikipedia.org/wiki/Value_investing) pioneered by Benjamin Graham and Warren Buffett.
 
 Also take your emotion and greed in control.
+
+## ⚠️ Limitation
+
++ I am not a professional analyst. I made all the calculation / estimation based on historical data (latest 3-4 yr) based on my understanding and AI's guidance.
++ No proprietary data source.
+  + All the calculation / estimation are based on the unofficial yfinance Python library. It contains only the latest 3 or 4 annual or quarterly financial statements, plus the trailing twelve months (TTM).
++ Yahoo Finance may disable the API in the future.
 
 ## ⚠️ Disclaimer
 
