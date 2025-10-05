@@ -22,8 +22,7 @@ fair_value_payload = val.valuate()
 
 # Conduct the Macroeconomics evaluation using the World Bank API.
 country = stock.country
-macros = MacroEconomic(macro_cfg['base_currency_country'], country, macro_cfg['macro_years'], macro_cfg["fx_years"], macro_cfg["ca_years"], macro_cfg["inflation_years"])
-macro_payload = macros.to_payload()
+macros = MacroEconomic(macro_cfg['base_currency_country'], country, macro_cfg['macro_years'])
 
 # Conduct the 6-category evaluation and get the payload.
 eva = Evaluator(stock, macros)

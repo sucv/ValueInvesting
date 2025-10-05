@@ -33,7 +33,7 @@ from configs import macro_cfg
 # =============================================================================
 # Page config
 # =============================================================================
-st.set_page_config(page_title="Value Investing Dashboard", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Value Investing Dashboard", page_icon="📈", layout="centered")
 
 # =============================================================================
 # Enhanced Global CSS — responsive design for PC, iPad, Phone
@@ -54,10 +54,11 @@ st.markdown(
         --btn-secondary-text: #E6EEF7;
       }
 
-      /* Base layout */
+      /* Base layout - widened centered mode */
       .block-container { 
         padding-top: 1.2rem; 
         padding-bottom: 2rem;
+        max-width: 1200px;  /* Widen from default ~700px */
       }
 
       [data-baseweb="tab-panel"] { overflow: visible; }
@@ -354,9 +355,6 @@ def run_evaluation_only() -> Dict[str, Any]:
         macro_cfg["base_currency_country"],
         st.session_state.stock.country,
         macro_cfg["macro_years"],
-        macro_cfg["fx_years"],
-        macro_cfg["ca_years"],
-        macro_cfg["inflation_years"],
     )
     evaluator = Evaluator(st.session_state.stock, macros)
     return evaluator.run_all()
@@ -604,37 +602,6 @@ def _news_items_html(stock_obj: Stock) -> str:
     return "".join(rows) if rows else "<div style='opacity:.8;'>No recent news available.</div>"
 
 
-def render_about_news_officers_tabbed(stock_obj: Stock) -> None:
-    tab_about, tab_news, tab_officers = st.tabs(["About", "News", "Officers"])
-
-    with tab_about:
-        about_text = getattr(stock_obj, "company_summary", None) or "No company summary available."
-        st.markdown("#### About")
-        st.markdown(f"<div style='opacity:.95; line-height:1.6;'>{about_text}</div>", unsafe_allow_html=True)
-
-    with tab_news:
-        st.markdown("#### News")
-        items_html = _news_items_html(stock_obj)
-        st.markdown(items_html, unsafe_allow_html=True)
-
-    with tab_officers:
-        st.markdown("#### Officers")
-        officers = getattr(stock_obj, "officers", None) or getattr(stock_obj, "company_officers", None)
-        if isinstance(officers, list) and officers:
-            for off in officers:
-                if isinstance(off, dict):
-                    name = off.get("name") or "—"
-                    title = off.get("title") or off.get("position") or ""
-                elif isinstance(off, (list, tuple)):
-                    name = off[0] if len(off) > 0 else "—"
-                    title = off[1] if len(off) > 1 else ""
-                else:
-                    continue
-                st.markdown(f"- **{name}** — {title}")
-        else:
-            st.caption("No officer information available.")
-
-
 # =============================================================================
 # Evaluation Checklist - Using st.dataframe
 # =============================================================================
@@ -679,22 +646,22 @@ def render_evaluation_checklist_card(evaluation_payload: Dict[str, Any], criteri
             st.caption("No evaluation criteria available.")
 
     with tab_past:
-        st.markdown("#### Evaluation Checklist")
+        # st.markdown("#### Evaluation Checklist")
         _render_category_table("past")
     with tab_present:
-        st.markdown("#### Evaluation Checklist")
+        # st.markdown("#### Evaluation Checklist")
         _render_category_table("present")
     with tab_future:
-        st.markdown("#### Evaluation Checklist")
+        # st.markdown("#### Evaluation Checklist")
         _render_category_table("future")
     with tab_health:
-        st.markdown("#### Evaluation Checklist")
+        # st.markdown("#### Evaluation Checklist")
         _render_category_table("health")
     with tab_dividend:
-        st.markdown("#### Evaluation Checklist")
+        # st.markdown("#### Evaluation Checklist")
         _render_category_table("dividend")
     with tab_macro:
-        st.markdown("#### Evaluation Checklist")
+        # st.markdown("#### Evaluation Checklist")
         _render_category_table("macroeconomics")
 
 
@@ -755,147 +722,8 @@ def _fmt_scalar_value_for_display(value_any: Any) -> str:
 # =============================================================================
 # Details Tab Renderers
 # =============================================================================
-def render_details_scalars(data: Dict[str, Any]) -> None:
-    """Render scalar fact sheets using st.dataframe."""
-    st.markdown("### 📊 Basic & Derived Metrics")
-    st.markdown("Key financial metrics and ratios that provide a snapshot of the company's current state.")
-
-    tab_original, tab_derived = st.tabs(["Original Metrics", "Derived Metrics"])
-
-    with tab_original:
-        st.markdown("#### Basic Information")
-        st.caption("Core company metrics extracted from financial statements")
-        mapping = data["basic_information_mapping"]
-        name_map = data["basic_info_name_map"]
-
-        if mapping:
-            df_rows = []
-            for metric_name, value in mapping.items():
-                if metric_name == "company_summary":
-                    continue
-                display_name = name_map.get(metric_name, metric_name)
-                df_rows.append({
-                    "Metric": display_name,
-                    "Value": _fmt_scalar_value_for_display(value)
-                })
-
-            if df_rows:
-                df = pd.DataFrame(df_rows)
-                st.dataframe(
-                    df,
-                    use_container_width=True,
-                    hide_index=True,
-                    column_config={
-                        "Metric": st.column_config.TextColumn("Metric", width="medium"),
-                        "Value": st.column_config.TextColumn("Value", width="medium"),
-                    }
-                )
-        else:
-            st.caption("No basic information available.")
-
-    with tab_derived:
-        st.markdown("#### Derived Scalars")
-        st.caption("Calculated metrics based on fundamental data")
-        mapping = data["derived_scalar_mapping"]
-        name_map = {k: v.get("fancy_name", k) for k, v in DERIVED_METRICS.items()}
-
-        if mapping:
-            df_rows = []
-            for metric_name, value in mapping.items():
-                display_name = name_map.get(metric_name, metric_name)
-                df_rows.append({
-                    "Metric": display_name,
-                    "Value": _fmt_scalar_value_for_display(value)
-                })
-
-            if df_rows:
-                df = pd.DataFrame(df_rows)
-                st.dataframe(
-                    df,
-                    use_container_width=True,
-                    hide_index=True,
-                    column_config={
-                        "Metric": st.column_config.TextColumn("Metric", width="medium"),
-                        "Value": st.column_config.TextColumn("Value", width="medium"),
-                    }
-                )
-        else:
-            st.caption("No derived scalars available.")
-
-
-def render_details_series(data: Dict[str, Any]) -> None:
-    """Render series fact sheets using st.dataframe."""
-    st.markdown("### 📈 Time Series Data")
-    st.markdown("Historical trends showing how key metrics have evolved over time (latest 5 periods).")
-
-    tab_original, tab_derived = st.tabs(["Original Series", "Derived Series"])
-
-    def _render_series_dataframe(mapping: Dict[str, Dict[str, Any]], name_map: Dict[str, str], title: str,
-                                 caption: str):
-        st.markdown(f"#### {title}")
-        st.caption(caption)
-
-        if not mapping:
-            st.caption("No time-series data available.")
-            return
-
-        all_timestamps = set()
-        for series_map in mapping.values():
-            all_timestamps.update(str(k) for k in (series_map or {}).keys())
-
-        timestamps_sorted = sorted(all_timestamps, reverse=True)[:5]
-
-        if not timestamps_sorted:
-            st.caption("No time-series data available.")
-            return
-
-        df_data = {"Metric": []}
-        for ts in timestamps_sorted:
-            df_data[ts] = []
-
-        for metric_key in name_map.keys():
-            if metric_key not in mapping:
-                continue
-
-            display_name = name_map.get(metric_key, metric_key)
-            df_data["Metric"].append(display_name)
-
-            series_map = mapping.get(metric_key, {}) or {}
-            for ts in timestamps_sorted:
-                val = series_map.get(ts)
-                try:
-                    f = float(val)
-                    txt = format_compact_number(f) if np.isfinite(f) else "—"
-                except Exception:
-                    txt = "—"
-                df_data[ts].append(txt)
-
-        if df_data["Metric"]:
-            df = pd.DataFrame(df_data)
-            st.dataframe(df, use_container_width=True, hide_index=True)
-            st.caption('"—" indicates no data for that period.')
-        else:
-            st.caption("No time-series data available.")
-
-    with tab_original:
-        _render_series_dataframe(
-            data["financial_points_mapping"],
-            data["financial_points_name_map"],
-            "Financial Points",
-            "Raw financial data from statements over time"
-        )
-
-    with tab_derived:
-        _render_series_dataframe(
-            data["derived_series_mapping"],
-            {k: v.get("fancy_name", k) for k, v in DERIVED_METRICS.items()},
-            "Derived Series",
-            "Calculated metrics showing historical trends"
-        )
-
-
 def render_details_valuation(fair_value_payload: Dict[str, Any]) -> None:
-    """Render valuation methods with educational content."""
+    """Render valuation methods with educational content and detailed calculations."""
     st.markdown("### 💰 Valuation Methods")
     st.markdown("""
     Different valuation approaches provide multiple perspectives on fair value. Each method has strengths and limitations 
@@ -919,41 +747,113 @@ def render_details_valuation(fair_value_payload: Dict[str, Any]) -> None:
 
         fancy_name = method_data.get("fancy_name", display_name)
         description = method_data.get("description", "")
-        inputs_list = method_data.get("inputs", [])
         outputs = method_data.get("outputs", {})
         feasibility = method_data.get("feasibility", "")
-        formula = method_data.get("formula", "")
+        calculation_steps = method_data.get("calculation", [])
 
         fair_value = outputs.get("Fair Value", np.nan)
 
-        with st.expander(f"**{fancy_name}** — Fair Value: {format_compact_number(fair_value)}"):
+        with st.expander(f"**{fancy_name}** — Fair Value: {format_compact_number(fair_value)}", expanded=False):
+            # Overview
             if description:
                 st.markdown("**Overview**")
                 st.write(description)
+                st.markdown("---")
 
-            if inputs_list:
-                st.markdown("**Key Inputs**")
-                for inp in inputs_list:
-                    st.markdown(f"- {inp}")
+            # Detailed Calculation Breakdown
+            if calculation_steps:
+                st.markdown("**Step-by-Step Calculation**")
+                st.caption("Follow the calculation using this company's actual financial data")
 
+                for idx, step_data in enumerate(calculation_steps, 1):
+                    step_name = step_data.get("step", f"Step {idx}")
+                    step_desc = step_data.get("description", "")
+                    step_latex = step_data.get("latex", "")
+                    step_explanation = step_data.get("explanation", "")
+                    step_input_table = step_data.get("input_table", None)
+                    step_details = step_data.get("details", {})
+
+                    # Step header
+                    if step_name.upper() == "ERROR":
+                        st.error(f"⚠️ **{step_name}**")
+                    else:
+                        st.markdown(f"**{idx}. {step_name}**")
+
+                    # Description
+                    if step_desc:
+                        st.caption(step_desc)
+
+                    # Input table for input collection steps
+                    if step_input_table:
+                        input_df = pd.DataFrame(list(step_input_table.items()), columns=["Parameter", "Value"])
+                        st.table(input_df)
+
+                    # LaTeX formula for this step
+                    if step_latex:
+                        try:
+                            st.latex(step_latex)
+                        except Exception:
+                            st.code(step_latex, language=None)
+
+                        # Show explanation of variables
+                        if step_explanation:
+                            st.caption(step_explanation)
+
+                    # Details rendering (non-input-table)
+                    if step_details and not step_input_table:
+                        for key, value in step_details.items():
+                            if key == "yearly_table" and isinstance(value, pd.DataFrame):
+                                st.markdown("*Yearly Breakdown:*")
+                                st.dataframe(value, use_container_width=True)
+                            elif isinstance(value, dict):
+                                st.markdown(f"*{key}:*")
+                                dict_rows = []
+                                for sub_key, sub_val in value.items():
+                                    dict_rows.append({"Item": sub_key, "Value": str(sub_val)})
+                                if dict_rows:
+                                    df = pd.DataFrame(dict_rows)
+                                    st.dataframe(
+                                        df,
+                                        use_container_width=True,
+                                        hide_index=True,
+                                        column_config={
+                                            "Item": st.column_config.TextColumn("Item", width="medium"),
+                                            "Value": st.column_config.TextColumn("Value", width="medium"),
+                                        }
+                                    )
+                            elif isinstance(value, list):
+                                st.markdown(f"*{key}:*")
+                                st.write(value)
+                            else:
+                                # Skip redundant display if already in explanation
+                                pass
+
+                    # Spacer between steps
+                    if idx < len(calculation_steps):
+                        st.markdown("")
+
+                st.markdown("---")
+
+            # Final Outputs
             if outputs:
-                st.markdown("**Outputs**")
+                st.markdown("**Final Result**")
                 for key, val in outputs.items():
-                    st.metric(key, format_compact_number(val))
+                    if isinstance(val, bool):
+                        st.metric(key, "Yes" if val else "No")
+                    elif isinstance(val, (int, float)):
+                        st.metric(key, format_compact_number(val))
+                    else:
+                        st.metric(key, str(val))
+                st.markdown("---")
 
+            # Feasibility & Limitations
             if feasibility:
-                st.markdown("**Feasibility & Limitations**")
+                st.markdown("**When This Method Works Best**")
                 st.info(feasibility)
-
-            # if formula:
-            #     st.markdown("**Formula**")
-            #     # Fix LaTeX escaping: replace single backslashes with double backslashes
-            #     formula_escaped = formula.replace('\\', '\\\\')
-            #     st.latex(formula_escaped)
 
 
 def render_details_evaluation(evaluation_payload: Dict[str, Any]) -> None:
-    """Render evaluation criteria with educational content."""
+    """Render evaluation criteria with educational content and input data."""
     st.markdown("### ✅ Investment Criteria Evaluation")
     st.markdown("""
     A systematic evaluation across six dimensions: historical performance (Past), current fundamentals (Present), 
@@ -968,6 +868,36 @@ def render_details_evaluation(evaluation_payload: Dict[str, Any]) -> None:
         ("dividend", "💵 Dividend Quality", "Dividend sustainability and track record"),
         ("macroeconomics", "🌍 Macroeconomic Context", "Broader economic environment"),
     ]
+
+    # Build fancy name mapping from FINANCIALS and DERIVED_METRICS
+    from core.constants import FINANCIALS, DERIVED_METRICS
+
+    fancy_name_map = {}
+    for alias, meta in FINANCIALS.items():
+        if isinstance(meta, dict):
+            fancy_name_map[alias] = meta.get("fancy_name", alias)
+    for alias, meta in DERIVED_METRICS.items():
+        if isinstance(meta, dict):
+            fancy_name_map[alias] = meta.get("fancy_name", alias)
+
+    def _format_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
+        """Format datetime columns to show only date (YYYY-MM-DD)"""
+        df = df.copy()
+        if isinstance(df.columns, pd.DatetimeIndex):
+            df.columns = df.columns.strftime('%Y-%m-%d')
+        elif isinstance(df.index, pd.DatetimeIndex):
+            df.index = df.index.strftime('%Y-%m-%d')
+        return df
+
+    def _apply_fancy_names_to_index(df: pd.DataFrame, name_map: dict) -> pd.DataFrame:
+        """Replace bare index names with fancy names from constants"""
+        df = df.copy()
+        new_index = []
+        for idx_name in df.index:
+            fancy = name_map.get(str(idx_name), idx_name)
+            new_index.append(fancy)
+        df.index = new_index
+        return df
 
     for category_key, category_title, category_desc in categories:
         category_data = evaluation_payload.get(category_key, {})
@@ -988,43 +918,91 @@ def render_details_evaluation(evaluation_payload: Dict[str, Any]) -> None:
             fancy_name = meta.get("fancy_name", signal_key)
             description = meta.get("description", "")
             criteria = meta.get("criteria", "")
-            input_info = meta.get("input", "")
             method_info = meta.get("method", "")
 
             check_value = result.get("check", 0.0)
             passed = isinstance(check_value, (int, float)) and float(check_value) >= 0.5
             outputs = result.get("outputs", {})
+            inputs = result.get("inputs", None)
 
             status_icon = "✅" if passed else "❌"
-            status_text = "PASS" if passed else "FAIL"
 
-            with st.expander(f"{status_icon} **{fancy_name}** — {status_text}"):
+            with st.expander(f"{status_icon} **{fancy_name}**", expanded=False):
+                # Description
                 if description:
                     st.markdown("**What This Measures**")
                     st.write(description)
+                    st.markdown("---")
 
+                # Criteria
                 if criteria:
                     st.markdown("**Criteria**")
                     st.code(criteria, language=None)
+                    st.markdown("---")
 
+                # Input Data Visualization
+                if inputs is not None:
+                    st.markdown("**Input Data**")
+                    st.caption("The raw data used for this evaluation")
+
+                    if isinstance(inputs, pd.Series):
+                        # Single series - show horizontally (dates as columns)
+                        display_df = pd.DataFrame([inputs.values], columns=inputs.index.astype(str))
+                        display_df.index = [fancy_name_map.get(inputs.name, inputs.name) if inputs.name else "Value"]
+
+                        # Format datetime columns
+                        display_df = _format_datetime_columns(display_df)
+
+                        # Format numbers
+                        for col in display_df.columns:
+                            val = display_df.loc[display_df.index[0], col]
+                            if isinstance(val, (int, float)) and np.isfinite(val):
+                                display_df.loc[display_df.index[0], col] = format_compact_number(val)
+
+                        st.dataframe(display_df, use_container_width=True)
+
+                    elif isinstance(inputs, pd.DataFrame):
+                        # DataFrame with multiple metrics - transpose so dates are columns
+                        display_df = inputs.copy()
+
+                        # Transpose: dates become columns, metrics become index
+                        display_df = display_df.T
+
+                        # Format datetime columns
+                        display_df = _format_datetime_columns(display_df)
+
+                        # Apply fancy names to index
+                        display_df = _apply_fancy_names_to_index(display_df, fancy_name_map)
+
+                        # Format numbers
+                        for col in display_df.columns:
+                            for idx in display_df.index:
+                                val = display_df.loc[idx, col]
+                                if isinstance(val, (int, float)) and np.isfinite(val):
+                                    display_df.loc[idx, col] = format_compact_number(val)
+
+                        st.dataframe(display_df, use_container_width=True)
+
+                    st.markdown("---")
+
+                # Results/Outputs
                 if outputs:
                     st.markdown("**Results**")
-                    cols = st.columns(len(outputs))
+                    cols = st.columns(min(len(outputs), 3))
                     for idx, (key, val) in enumerate(outputs.items()):
-                        with cols[idx]:
+                        with cols[idx % len(cols)]:
                             if isinstance(val, bool):
                                 st.metric(key, "Yes" if val else "No")
                             elif isinstance(val, (int, float)):
                                 st.metric(key, format_compact_number(val))
                             else:
                                 st.metric(key, str(val))
+                    st.markdown("---")
 
-                if input_info or method_info:
+                # Methodology
+                if method_info:
                     st.markdown("**Methodology**")
-                    if input_info:
-                        st.markdown(f"*Input:* {input_info}")
-                    if method_info:
-                        st.markdown(f"*Method:* {method_info}")
+                    st.markdown(f"*{method_info}*")
 
 
 # =============================================================================
@@ -1263,69 +1241,570 @@ def collect_prompt_text(
         key_ratios_payload: Optional[List[Dict[str, Any]]] = None,
         url_map: Optional[Dict[str, str]] = None,
 ) -> str:
-    """Build the final plain-text prompt."""
-    company_summary_text: str = getattr(stock_obj, "company_summary", "") or ""
+    """
+    Build the final plain-text prompt by gathering data from all tabs:
+    - Overview: Company info, fair values, key ratios, news, officers, about
+    - Data Points: Basic info, time series (financial points + derived metrics)
+    - Valuation: All valuation method details
+    - Evaluation: All evaluation criteria details
+    """
 
-    basic_info_lines = _format_key_value_lines(
+    sections: List[str] = []
+
+    # =========================================================================
+    # COMPANY HEADER
+    # =========================================================================
+    company_name = getattr(stock_obj, "name", "Unknown Company")
+    ticker = getattr(stock_obj, "ticker", "N/A")
+    sector = getattr(stock_obj, "sector", "N/A")
+    industry = getattr(stock_obj, "industry", "N/A")
+    country = getattr(stock_obj, "country", "N/A")
+
+    sections.append(f"═══════════════════════════════════════════════════════════════════════")
+    sections.append(f"COMPANY: {company_name} ({ticker})")
+    sections.append(f"Sector: {sector} | Industry: {industry} | Country: {country}")
+    sections.append(f"═══════════════════════════════════════════════════════════════════════\n")
+
+    # =========================================================================
+    # OVERVIEW TAB DATA
+    # =========================================================================
+    sections.append("───────────────────────────────────────────────────────────────────────")
+    sections.append("OVERVIEW TAB")
+    sections.append("───────────────────────────────────────────────────────────────────────\n")
+
+    # Company Summary (About)
+    company_summary_text = getattr(stock_obj, "company_summary", "") or "No company summary available."
+    sections.append("■ COMPANY SUMMARY")
+    sections.append(company_summary_text.strip())
+    sections.append("")
+
+    # Fair Values
+    current_price_val = getattr(stock_obj, "current_price", None)
+    fair_values_text = _format_fair_values_detailed(fair_values, current_price_val)
+    sections.append("■ FAIR VALUE ESTIMATES")
+    sections.append(fair_values_text)
+    sections.append("")
+
+    # Key Ratios
+    if not key_ratios_payload:
+        key_ratios_payload = build_key_ratios_from_config(stock_obj)
+    key_ratios_text = _format_key_ratios_lines(key_ratios_payload)
+    sections.append("■ KEY RATIOS")
+    sections.append(key_ratios_text)
+    sections.append("")
+
+    # Company Officers
+    officers_text = _format_officers_lines(
+        getattr(stock_obj, "officers", None) or getattr(stock_obj, "company_officers", None)
+    )
+    sections.append("■ COMPANY OFFICERS")
+    sections.append(officers_text)
+    sections.append("")
+
+    # News (top 10 items)
+    news_text = _format_news_items_text(stock_obj)
+    sections.append("■ RECENT NEWS (Latest 10)")
+    sections.append(news_text)
+    sections.append("")
+
+    # =========================================================================
+    # DATA POINTS TAB
+    # =========================================================================
+    sections.append("───────────────────────────────────────────────────────────────────────")
+    sections.append("DATA POINTS TAB")
+    sections.append("───────────────────────────────────────────────────────────────────────\n")
+
+    # Basic Information
+    basic_info_text = _format_key_value_lines(
         prepared_fact_data["basic_info_name_map"],
         prepared_fact_data["basic_information_mapping"],
     )
+    sections.append("■ BASIC INFORMATION")
+    sections.append(basic_info_text)
+    sections.append("")
 
-    derived_scalar_lines = _format_key_value_lines(
-        {k: v.get("fancy_name", k) for k, v in DERIVED_METRICS.items()},
-        prepared_fact_data["derived_scalar_mapping"],
-    )
-
-    if not key_ratios_payload:
-        key_ratios_payload = build_key_ratios_from_config(stock_obj)
-    key_ratios_lines = _format_key_ratios_lines(key_ratios_payload)
-
-    current_price_val = getattr(stock_obj, "current_price", None)
-    fair_values_lines = _format_fair_values_lines(fair_values, current_price_val)
-
-    series_original_lines = _format_series_table_lines(
+    # Time Series - Financial Points
+    financial_points_text = _format_series_table_detailed(
         prepared_fact_data["financial_points_mapping"],
-        prepared_fact_data["financial_points_name_map"],
+        prepared_fact_data["financial_points_name_map"]
     )
-    series_derived_lines = _format_series_table_lines(
-        prepared_fact_data["derived_series_mapping"],
-        {k: v.get("fancy_name", k) for k, v in DERIVED_METRICS.items()},
-    )
+    sections.append("■ TIME SERIES: FINANCIAL POINTS (Latest 5 periods)")
+    sections.append(financial_points_text)
+    sections.append("")
 
-    officers_lines = _format_officers_lines(
-        getattr(stock_obj, "officers", None) or getattr(stock_obj, "company_officers", None)
-    )
+    # Time Series - Derived Metrics (non-dividend)
+    dividend_metric_keys = {
+        "dividend_per_share_history",
+        "price_at_dividend",
+        "dividend_yield",
+        "dividend_per_share_yoy_growth"
+    }
+    derived_mapping = prepared_fact_data["derived_series_mapping"]
+    other_derived = {k: v for k, v in derived_mapping.items() if k not in dividend_metric_keys}
+    dividend_derived = {k: v for k, v in derived_mapping.items() if k in dividend_metric_keys}
 
-    evaluation_lines = _format_evaluation_lines(evaluation_payload)
+    derived_name_map = {k: v.get("fancy_name", k) for k, v in DERIVED_METRICS.items()}
 
+    if other_derived:
+        other_derived_text = _format_series_table_detailed(other_derived, derived_name_map)
+        sections.append("■ TIME SERIES: DERIVED METRICS (Latest 5 periods)")
+        sections.append(other_derived_text)
+        sections.append("")
+
+    if dividend_derived:
+        dividend_derived_text = _format_series_table_detailed(dividend_derived, derived_name_map)
+        sections.append("■ TIME SERIES: DIVIDEND METRICS (Latest 5 periods)")
+        sections.append(dividend_derived_text)
+        sections.append("")
+
+    # =========================================================================
+    # VALUATION TAB
+    # =========================================================================
+    sections.append("───────────────────────────────────────────────────────────────────────")
+    sections.append("VALUATION TAB")
+    sections.append("───────────────────────────────────────────────────────────────────────\n")
+
+    valuation_details_text = _format_valuation_methods_detailed(fair_values)
+    sections.append(valuation_details_text)
+    sections.append("")
+
+    # =========================================================================
+    # EVALUATION TAB
+    # =========================================================================
+    sections.append("───────────────────────────────────────────────────────────────────────")
+    sections.append("EVALUATION TAB")
+    sections.append("───────────────────────────────────────────────────────────────────────\n")
+
+    evaluation_details_text = _format_evaluation_detailed(evaluation_payload)
+    sections.append(evaluation_details_text)
+    sections.append("")
+
+    # =========================================================================
+    # ONLINE DOCUMENT URLS
+    # =========================================================================
     url_map = url_map or {}
     pruned = _prune_default_urls(url_map)
     if pruned:
+        sections.append("───────────────────────────────────────────────────────────────────────")
+        sections.append("ONLINE DOCUMENT URLS")
+        sections.append("───────────────────────────────────────────────────────────────────────\n")
         url_lines = []
-        if "10-K" in pruned: url_lines.append(f"10-K: {pruned['10-K']}")
-        if "10-Q" in pruned: url_lines.append(f"10-Q: {pruned['10-Q']}")
-        if "Extra" in pruned: url_lines.append(f"Extra: {pruned['Extra']}")
-        urls_block = "\n".join(url_lines)
+        if "10-K" in pruned: url_lines.append(f"10-K Annual Report: {pruned['10-K']}")
+        if "10-Q" in pruned: url_lines.append(f"10-Q Quarterly Report: {pruned['10-Q']}")
+        if "Extra" in pruned: url_lines.append(f"Additional Document: {pruned['Extra']}")
+        sections.append("\n".join(url_lines))
+        sections.append("")
+
+    # Combine all sections
+    final_text = "\n".join(sections)
+
+    # Prepend the prompt template
+    final_text = PROMPT_TEMPLATE + "\n\n" + final_text
+
+    return final_text
+
+
+# =============================================================================
+# Enhanced Formatting Helper Functions
+# =============================================================================
+
+def _format_fair_values_detailed(fair_values: Dict[str, Any], current_price: Optional[float]) -> str:
+    """Format fair values with upside/downside calculations"""
+    method_display_map = {
+        "price_earning_multiples": "P/E Multiple Method",
+        "discounted_cash_flow_one_stage": "DCF One-Stage (Declining Growth)",
+        "discounted_cash_flow_two_stage": "DCF Two-Stage Model",
+        "discounted_dividend_two_stage": "Dividend Discount Model (Two-Stage)",
+        "return_on_equity": "Return on Equity Capitalization",
+        "excess_return": "Residual Income (Excess Return)",
+        "graham_number": "Graham Number",
+    }
+
+    rows: List[Tuple[str, float, Optional[float]]] = []
+    for method_key, payload in (fair_values or {}).items():
+        outputs = (payload or {}).get("outputs", {}) or {}
+        fv = outputs.get("Fair Value", None)
+        if isinstance(fv, (int, float)) and np.isfinite(fv):
+            upside = None
+            if isinstance(current_price, (int, float)) and np.isfinite(current_price) and current_price > 0:
+                upside = (fv / current_price - 1.0) * 100  # Convert to percentage
+            rows.append((method_display_map.get(method_key, method_key), float(fv), upside))
+
+    # Sort by upside if available, else by fair value
+    if isinstance(current_price, (int, float)) and np.isfinite(current_price) and current_price > 0:
+        rows.sort(key=lambda r: r[2] if r[2] is not None else -999, reverse=True)
     else:
-        urls_block = "(none provided)"
+        rows.sort(key=lambda r: r[1], reverse=True)
+
+    lines: List[str] = []
+    if isinstance(current_price, (int, float)) and np.isfinite(current_price):
+        lines.append(f"Current Market Price: {format_compact_number(current_price)}")
+        lines.append("")
+
+    for method_name, fv, upside_pct in rows:
+        fv_str = format_compact_number(fv)
+        if upside_pct is not None:
+            upside_str = f"{upside_pct:+.1f}%" if upside_pct != 0 else "0.0%"
+            lines.append(f"{method_name:<45} {fv_str:>12}  ({upside_str} upside)")
+        else:
+            lines.append(f"{method_name:<45} {fv_str:>12}")
+
+    return "\n".join(lines) if lines else "No fair value estimates available."
+
+
+def _format_series_table_detailed(series_map: Dict[str, Dict[str, Any]], name_map: Dict[str, str]) -> str:
+    """Format time series data in a detailed table format"""
+    all_ts = set()
+    for v in (series_map or {}).values():
+        all_ts.update(str(k) for k in (v or {}).keys())
+    ts_sorted_desc = sorted(all_ts, reverse=True)[:5]
+
+    if not ts_sorted_desc:
+        return "No time series data available."
+
+    lines: List[str] = []
+
+    # Header row
+    header = f"{'Metric':<40}"
+    for ts in ts_sorted_desc:
+        header += f"{ts:>15}"
+    lines.append(header)
+    lines.append("─" * (40 + 15 * len(ts_sorted_desc)))
+
+    # Data rows
+    for metric_key in name_map.keys():
+        if metric_key not in series_map:
+            continue
+
+        display_name = name_map.get(metric_key, metric_key)
+        row = f"{display_name:<40}"
+
+        per_ts = series_map.get(metric_key, {}) or {}
+        for ts in ts_sorted_desc:
+            val = per_ts.get(ts, None)
+            try:
+                f = float(val)
+                txt = format_compact_number(f) if np.isfinite(f) else "—"
+            except Exception:
+                txt = "—"
+            row += f"{txt:>15}"
+
+        lines.append(row)
+
+    return "\n".join(lines)
+
+
+def _format_news_items_text(stock_obj: Stock) -> str:
+    """Format news items as plain text"""
+    news_items = getattr(stock_obj, "news", None) or getattr(stock_obj, "company_news", None)
+    if not isinstance(news_items, list) or not news_items:
+        return "No recent news available."
+
+    lines: List[str] = []
+    for idx, item in enumerate(news_items[:10], 1):
+        date_str, title, summary, link = None, None, "", None
+
+        if isinstance(item, (list, tuple)) and len(item) >= 4:
+            date_str = item[0]
+            title = item[1]
+            summary = item[2] if item[2] is not None else ""
+            link = item[-1]
+        elif isinstance(item, dict):
+            n = item
+            date_str = n.get("pubDate") or n.get("published") or n.get("providerPublishTime") or ""
+            title = n.get("title") or n.get("headline") or "News"
+            summary = n.get("summary") or n.get("content") or ""
+            url_obj = n.get("canonicalUrl") or {}
+            link = url_obj.get("url") if isinstance(url_obj, dict) else (n.get("link") or n.get("url"))
+        else:
+            continue
+
+        if not title:
+            title = "Untitled News"
+
+        lines.append(f"{idx}. [{date_str or 'No date'}] {title}")
+        if summary:
+            # Truncate long summaries
+            summary_clean = summary[:200] + "..." if len(summary) > 200 else summary
+            lines.append(f"   {summary_clean}")
+        if link:
+            lines.append(f"   Link: {link}")
+        lines.append("")
+
+    return "\n".join(lines) if lines else "No recent news available."
+
+
+def _format_valuation_methods_detailed(fair_value_payload: Dict[str, Any]) -> str:
+    """Format all valuation methods with their detailed calculations"""
+    method_order = [
+        ("price_earning_multiples", "P/E Multiple Method"),
+        ("discounted_cash_flow_one_stage", "DCF One-Stage"),
+        ("discounted_cash_flow_two_stage", "DCF Two-Stage"),
+        ("discounted_dividend_two_stage", "Dividend Discount Model"),
+        ("return_on_equity", "ROE Capitalization"),
+        ("excess_return", "Residual Income Model"),
+        ("graham_number", "Graham Number"),
+    ]
 
     sections: List[str] = []
-    sections.append("Company Summary:\n" + (company_summary_text.strip() or "(no summary)"))
-    sections.append("Stock basic information:\n" + (basic_info_lines.strip() or "—"))
-    sections.append("Stock key ratios:\n" + (key_ratios_lines.strip() or "—"))
-    sections.append("Stock Fair values:\n" + (fair_values_lines.strip() or "—"))
 
-    fp_blocks: List[str] = []
-    fp_blocks.append("(Derived Series - latest 5):\n" + (series_derived_lines.strip() or "—"))
-    sections.append("Stock financial points\n" + "\n".join(fp_blocks))
+    for method_key, display_name in method_order:
+        method_data = fair_value_payload.get(method_key, {})
+        if not isinstance(method_data, dict):
+            continue
 
-    sections.append("Company Officer:\n" + (officers_lines.strip() or "—"))
-    sections.append("Evaluation:\n" + (evaluation_lines.strip() or "—"))
-    sections.append("Online document URLs:\n" + (urls_block.strip() if urls_block else "(none provided)"))
+        fancy_name = method_data.get("fancy_name", display_name)
+        description = method_data.get("description", "")
+        outputs = method_data.get("outputs", {})
+        feasibility = method_data.get("feasibility", "")
+        calculation_steps = method_data.get("calculation", [])
 
-    final_text = "\n\n".join(sections)
-    final_text = PROMPT_TEMPLATE + "\n\n" + final_text
-    return final_text
+        fair_value = outputs.get("Fair Value", np.nan)
+        fv_str = format_compact_number(fair_value)
+
+        sections.append(f"■ {fancy_name.upper()}")
+        sections.append(f"  Fair Value: {fv_str}")
+        sections.append("")
+
+        if description:
+            sections.append(f"  Overview: {description}")
+            sections.append("")
+
+        if calculation_steps:
+            sections.append("  Calculation Steps:")
+            for idx, step_data in enumerate(calculation_steps, 1):
+                step_name = step_data.get("step", f"Step {idx}")
+                step_desc = step_data.get("description", "")
+                step_input_table = step_data.get("input_table", None)
+                step_explanation = step_data.get("explanation", "")
+                step_details = step_data.get("details", {})
+
+                sections.append(f"  {idx}. {step_name}")
+                if step_desc:
+                    sections.append(f"     {step_desc}")
+
+                if step_input_table:
+                    for param, value in step_input_table.items():
+                        sections.append(f"     - {param}: {value}")
+
+                if step_explanation:
+                    sections.append(f"     {step_explanation}")
+
+                if step_details:
+                    for key, value in step_details.items():
+                        if key == "yearly_table" and isinstance(value, pd.DataFrame):
+                            sections.append(f"     Yearly Breakdown:")
+                            sections.append("     " + value.to_string().replace("\n", "\n     "))
+                        elif isinstance(value, dict):
+                            for sub_key, sub_val in value.items():
+                                sections.append(f"     - {sub_key}: {sub_val}")
+
+                sections.append("")
+
+        if feasibility:
+            sections.append(f"  When This Works Best: {feasibility}")
+            sections.append("")
+
+        sections.append("─" * 70)
+        sections.append("")
+
+    return "\n".join(sections)
+
+
+def _format_evaluation_detailed(evaluation_payload: Dict[str, Any]) -> str:
+    """Format all evaluation criteria with pass/fail and details"""
+    categories = [
+        ("past", "PAST PERFORMANCE"),
+        ("present", "PRESENT FUNDAMENTALS"),
+        ("future", "FUTURE MOMENTUM"),
+        ("health", "FINANCIAL HEALTH"),
+        ("dividend", "DIVIDEND QUALITY"),
+        ("macroeconomics", "MACROECONOMIC CONTEXT"),
+    ]
+
+    sections: List[str] = []
+
+    for category_key, category_title in categories:
+        category_data = evaluation_payload.get(category_key, {})
+        if not isinstance(category_data, dict) or not category_data:
+            continue
+
+        sections.append(f"■ {category_title}")
+        sections.append("")
+
+        for signal_key, result in category_data.items():
+            if not isinstance(result, dict):
+                continue
+
+            meta = CRITERION.get(category_key, {}).get(signal_key, {}) if isinstance(
+                CRITERION.get(category_key, {}), dict) else {}
+
+            fancy_name = meta.get("fancy_name", signal_key)
+            description = meta.get("description", "")
+            criteria = meta.get("criteria", "")
+
+            check_value = result.get("check", 0.0)
+            passed = isinstance(check_value, (int, float)) and float(check_value) >= 0.5
+            outputs = result.get("outputs", {})
+
+            status = "✅ PASS" if passed else "❌ FAIL"
+
+            sections.append(f"  {status} | {fancy_name}")
+            if description:
+                sections.append(f"    Description: {description}")
+            if criteria:
+                sections.append(f"    Criteria: {criteria}")
+
+            if outputs:
+                sections.append("    Results:")
+                for key, val in outputs.items():
+                    if isinstance(val, bool):
+                        val_str = "Yes" if val else "No"
+                    elif isinstance(val, (int, float)):
+                        val_str = format_compact_number(val)
+                    else:
+                        val_str = str(val)
+                    sections.append(f"      - {key}: {val_str}")
+
+            sections.append("")
+
+        sections.append("─" * 70)
+        sections.append("")
+
+    return "\n".join(sections)
+
+
+def render_details_basic_information(data: Dict[str, Any]) -> None:
+    """Render basic company information"""
+    st.markdown("### 📊 Basic Information")
+    st.caption("Core company metrics extracted from financial statements")
+
+    mapping = data["basic_information_mapping"]
+    name_map = data["basic_info_name_map"]
+
+    if mapping:
+        df_rows = []
+        for metric_name, value in mapping.items():
+            if metric_name == "company_summary":
+                continue
+            display_name = name_map.get(metric_name, metric_name)
+            df_rows.append({
+                "Metric": display_name,
+                "Value": _fmt_scalar_value_for_display(value)
+            })
+
+        if df_rows:
+            df = pd.DataFrame(df_rows)
+            st.dataframe(
+                df,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "Metric": st.column_config.TextColumn("Metric", width="medium"),
+                    "Value": st.column_config.TextColumn("Value", width="medium"),
+                }
+            )
+    else:
+        st.caption("No basic information available.")
+
+
+def render_details_time_series(data: Dict[str, Any]) -> None:
+    """Render time series data with separate dividend table"""
+    st.markdown("### 📈 Time Series Data")
+    st.caption("Historical trends showing how key metrics have evolved over time (latest 5 periods)")
+
+    from core.constants import DERIVED_METRICS
+
+    # Separate dividend metrics from other derived metrics
+    dividend_metric_keys = {
+        "dividend_per_share_history",
+        "price_at_dividend",
+        "dividend_yield",
+        "dividend_per_share_yoy_growth"
+    }
+
+    derived_mapping = data["derived_series_mapping"]
+    derived_name_map = {k: v.get("fancy_name", k) for k, v in DERIVED_METRICS.items()}
+
+    # Split into dividend and non-dividend metrics
+    dividend_metrics = {k: v for k, v in derived_mapping.items() if k in dividend_metric_keys}
+    other_derived_metrics = {k: v for k, v in derived_mapping.items() if k not in dividend_metric_keys}
+
+    def _render_series_table(mapping: Dict[str, Dict[str, Any]], name_map: Dict[str, str], title: str, caption: str):
+        st.markdown(f"#### {title}")
+        st.caption(caption)
+
+        if not mapping:
+            st.caption("No time-series data available.")
+            return
+
+        all_timestamps = set()
+        for series_map in mapping.values():
+            all_timestamps.update(str(k) for k in (series_map or {}).keys())
+
+        timestamps_sorted = sorted(all_timestamps, reverse=True)[:5]
+
+        if not timestamps_sorted:
+            st.caption("No time-series data available.")
+            return
+
+        df_data = {"Metric": []}
+        for ts in timestamps_sorted:
+            df_data[ts] = []
+
+        for metric_key in name_map.keys():
+            if metric_key not in mapping:
+                continue
+
+            display_name = name_map.get(metric_key, metric_key)
+            df_data["Metric"].append(display_name)
+
+            series_map = mapping.get(metric_key, {}) or {}
+            for ts in timestamps_sorted:
+                val = series_map.get(ts)
+                try:
+                    f = float(val)
+                    txt = format_compact_number(f) if np.isfinite(f) else "—"
+                except Exception:
+                    txt = "—"
+                df_data[ts].append(txt)
+
+        if df_data["Metric"]:
+            df = pd.DataFrame(df_data)
+            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.caption('"—" indicates no data for that period.')
+        else:
+            st.caption("No time-series data available.")
+
+        # Render financial points
+
+    _render_series_table(
+        data["financial_points_mapping"],
+        data["financial_points_name_map"],
+        "Financial Points",
+        "Raw financial data from statements over time"
+    )
+
+    st.markdown("---")
+
+    # Render non-dividend derived metrics
+    if other_derived_metrics:
+        _render_series_table(
+            other_derived_metrics,
+            derived_name_map,
+            "Derived Metrics",
+            "Calculated financial ratios and indicators"
+        )
+        st.markdown("---")
+
+    # Render dividend metrics separately
+    if dividend_metrics:
+        _render_series_table(
+            dividend_metrics,
+            derived_name_map,
+            "Dividend Metrics",
+            "Dividend-related metrics (may have different historical periods)"
+        )
 
 
 # =============================================================================
@@ -1459,7 +1938,9 @@ def main() -> None:
     )
 
     # Three tabs: Overview, Details (renamed from Fact Sheet), Prompts
-    tab_overview, tab_details, tab_prompts = st.tabs(["Overview", "Details", "Prompts"])
+    tab_overview, tab_data, tab_valuation, tab_evaluation, tab_prompts = st.tabs(
+        ["Overview", "Data Points", "Valuation", "Evaluation", "Prompts"]
+    )
 
     fair_values = st.session_state.fair_value_payload
     evaluation_payload = st.session_state.evaluation_payload or {}
@@ -1491,10 +1972,11 @@ def main() -> None:
             st.error(f"Failed to generate prompt. Details: {e}")
 
     with tab_overview:
-        col_price_chart, col_radar_chart, col_checklist = st.columns([0.4, 0.3, 0.3], gap="large")
+        # Row 1: Price Chart + Fair Value Table
+        col_price_chart, col_fair_value = st.columns([0.6, 0.4], gap="large")
 
         with col_price_chart:
-            st.markdown("#### Price in 10 years")
+            st.markdown("#### Historical Price since 10-yr Ago")
             price_df = getattr(stock_obj, "prices", None)
             try:
                 if hasattr(stock_obj, "get_prices_series"):
@@ -1502,56 +1984,90 @@ def main() -> None:
             except Exception:
                 pass
             if isinstance(price_df, pd.DataFrame) and "Close" in price_df.columns and not price_df.empty:
-                chart = build_price_line_chart(price_df.tail(3650 + 30), height=300,
-                                               margin=dict(l=10, r=10, t=10, b=10))
+                chart = build_price_line_chart(price_df.tail(3650 + 30), height=350,
+                                               margin=dict(l=5, r=5, t=5, b=5))
                 st.plotly_chart(chart, use_container_width=True)
             else:
                 st.caption("No price data available.")
+
+        with col_fair_value:
+            current_price = getattr(stock_obj, "current_price", np.nan) or np.nan
+            render_fair_value_table_card(current_price, fair_values)
+
+        st.markdown("---")
+        # insert_vertical_row_spacing(30)
+
+        # Row 2: Radar Chart + Evaluation Checklist
+        col_radar_chart, col_checklist = st.columns([0.6, 0.4], gap="large")
 
         with col_radar_chart:
             st.markdown("#### Evaluation Snowflakes")
             category_scores = compute_category_scores_for_radar(evaluation_payload)
             radar_labels = ["past", "present", "future", "health", "dividend", "macroeconomics"]
             radar_values = [category_scores.get(k, 0.0) for k in radar_labels]
-            radar_fig = build_radar_chart(radar_labels, radar_values, height=300, edge_pad=0.10,
-                                          margin=dict(l=10, r=10, t=10))
+            radar_fig = build_radar_chart(radar_labels, radar_values, height=350, edge_pad=0.10,
+                                          margin=dict(l=5, r=5, t=5))
             st.plotly_chart(radar_fig, use_container_width=True)
 
         with col_checklist:
             render_evaluation_checklist_card(evaluation_payload, CRITERION)
 
-        insert_vertical_row_spacing(30)
+        # st.markdown("---")
+        # insert_vertical_row_spacing(30)
 
-        colC, colD, colE = st.columns([0.20, 0.30, 0.5], gap="large")
-        with colC:
+        # Row 3: Tabbed section with Key Ratios, News, Officers, About
+        tab_key_ratios, tab_news, tab_officers, tab_about = st.tabs(["Key Ratios", "News", "Officers", "About"])
+
+        with tab_key_ratios:
             key_ratios_payload = (payload or {}).get("key_ratios", [])
             if not key_ratios_payload:
                 key_ratios_payload = build_key_ratios_from_config(stock_obj)
             render_key_ratios_card(key_ratios_payload)
 
-        with colD:
-            current_price = getattr(stock_obj, "current_price", np.nan) or np.nan
-            render_fair_value_table_card(current_price, fair_values)
+        with tab_news:
+            st.markdown("#### News")
+            items_html = _news_items_html(stock_obj)
+            st.markdown(items_html, unsafe_allow_html=True)
 
-        with colE:
-            render_about_news_officers_tabbed(stock_obj)
+        with tab_officers:
+            st.markdown("#### Officers")
+            officers = getattr(stock_obj, "officers", None) or getattr(stock_obj, "company_officers", None)
+            if isinstance(officers, list) and officers:
+                for off in officers:
+                    if isinstance(off, dict):
+                        name = off.get("name") or "—"
+                        title = off.get("title") or off.get("position") or ""
+                    elif isinstance(off, (list, tuple)):
+                        name = off[0] if len(off) > 0 else "—"
+                        title = off[1] if len(off) > 1 else ""
+                    else:
+                        continue
+                    st.markdown(f"- **{name}** — {title}")
+            else:
+                st.caption("No officer information available.")
 
-    with tab_details:
+        with tab_about:
+            about_text = getattr(stock_obj, "company_summary", None) or "No company summary available."
+            st.markdown("#### About")
+            st.markdown(f"<div style='opacity:.95; line-height:1.6;'>{about_text}</div>", unsafe_allow_html=True)
+
+    with tab_data:
         # Prepare fact sheet data once
         prepared_fact_data = prepare_fact_sheet_data(stock_obj)
 
-        # Section 1: Scalars and Series
-        render_details_scalars(prepared_fact_data)
+        # Section 1: Basic Information
+        render_details_basic_information(prepared_fact_data)
         st.markdown("---")
 
-        render_details_series(prepared_fact_data)
-        st.markdown("---")
+        # Section 2: Time Series Data
+        render_details_time_series(prepared_fact_data)
 
-        # Section 2: Valuation Methods
+    with tab_valuation:
+        # Valuation Methods
         render_details_valuation(fair_values)
-        st.markdown("---")
 
-        # Section 3: Evaluation Criteria
+    with tab_evaluation:
+        # Evaluation Criteria
         render_details_evaluation(evaluation_payload)
 
     with tab_prompts:

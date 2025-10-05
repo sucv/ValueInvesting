@@ -8,8 +8,6 @@ A comprehensive personal dashboard for value investment analysis, supporting sto
 
 This dashboard provides value investment analysis tools accessible to individual investors. It combines multiple valuation models, fundamental analysis metrics, and macroeconomic indicators to help you make informed investment decisions across international markets.
 
-![](figures/demo.jpg)
-
 1. Input your interested ticker
 2. See the fair prices, snowflake visualization, and key metrics
 3. Pull everything into a Prompt
@@ -81,7 +79,7 @@ The dashboard employs seven industry-standard valuation models:
 6. **Excess Return (ER)** - Economic value added approach
 7. **Graham Number (GN)** - Benjamin Graham's value formula
 
-> Detailed formulas available in `constants.py` under the `VALUATION` variable
+> See in the dashboard for detailed calculation steps.
 
 ## ✅ Comprehensive Evaluation Framework
 
@@ -97,11 +95,13 @@ Stocks are evaluated across six dimensions:
 When fiscal report URLs are provided, a seventh dimension is added:
 - **Qualitative Analysis** - AI-powered assessment of business strategy, competitive advantages, and management quality
 
-> Evaluation criteria details in `evaluation.py` under the `CRITERION` variable
+> See in the dashboard for detailed evaluation steps.
 
 ## 📚 Understanding Value Investing
 
 New to value investing? Start with the [fundamental concepts](https://en.wikipedia.org/wiki/Value_investing) pioneered by Benjamin Graham and Warren Buffett.
+
+Also take your emotion and greed in control.
 
 ## ⚠️ Disclaimer
 

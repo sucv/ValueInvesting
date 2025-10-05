@@ -144,16 +144,16 @@ class Stock:
         self.current_ratio = _safe_div(self.current_assets, self.current_liabilities).rename("current_ratio")
 
         self.earning_yoy_growth = _safe_yoy_growth(self.total_revenue).rename("earning_yoy_growth")
-        self.price_at = _get_price_at(self.total_equity, self.prices).rename("price_at")
+        self.stock_prices_atm = _get_price_at(self.total_equity, self.prices).rename("price_at")
 
-        self.market_cap = _safe_mul(self.price_at, self.shares_outstanding).rename("market_cap")
+        self.market_cap = _safe_mul(self.stock_prices_atm, self.shares_outstanding).rename("market_cap")
 
         # NOTE: Preserve original behavior
         self.book_value_per_share = _safe_div(self.total_equity, self.shares_outstanding).rename("book_value_per_share")
-        self.price_to_book = _safe_div(self.price_at, self.book_value_per_share).rename("price_to_book")
+        self.price_to_book = _safe_div(self.stock_prices_atm, self.book_value_per_share).rename("price_to_book")
 
         self.earning_per_share = _safe_div(self.net_income, self.shares_outstanding).rename("earning_per_share")
-        self.price_to_earning = _safe_div(self.price_at, self.earning_per_share).rename("price_to_earning")
+        self.price_to_earning = _safe_div(self.stock_prices_atm, self.earning_per_share).rename("price_to_earning")
         self.trailing_peg_ratio = _safe_div(
             self.price_to_earning,
             _safe_yoy_growth(self.earning_per_share) * 100.0,
@@ -171,8 +171,8 @@ class Stock:
             self.net_income,
         ).rename("dividend_payout_ratio")
 
-        self.price_at_dividend = _get_price_at(self.dividend_per_share_history, self.prices).rename("price_at_dividend")
-        self.dividend_yield = _safe_div(self.dividend_per_share_history, self.price_at_dividend).rename("dividend_yield")
+        self.stock_prices_atm_dividend = _get_price_at(self.dividend_per_share_history, self.prices).rename("price_at_dividend")
+        self.dividend_yield = _safe_div(self.dividend_per_share_history, self.stock_prices_atm_dividend).rename("dividend_yield")
 
         self.dividend_per_share_yoy_growth = _safe_yoy_growth(
             self.dividend_per_share_history

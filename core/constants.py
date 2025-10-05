@@ -214,6 +214,7 @@ DERIVED_METRICS = {
     "dividend_per_share_cagr":            {"fancy_name": "Dividend Per Share CAGR",            "kind": "scalar"},
 
     # --- Series ---
+    "stock_prices_atm":                   {"fancy_name": "Stock Prices",                     "kind": "series"},
     "debt_to_equity":                     {"fancy_name": "Debt to Equity",                     "kind": "series"},
     "net_profit_margin":                  {"fancy_name": "Net Profit Margin",                  "kind": "series"},
     "return_on_equity":                   {"fancy_name": "Return on Equity",                   "kind": "series"},
@@ -702,42 +703,42 @@ CRITERION: dict = {
         "free_cashflow": {
             "fancy_name": "Free Cash Flow Stable & Increasing",
             "description": "Stable and increasing free cash flow strengthens a company’s ability to self-fund operations and strategic initiatives. It reduces reliance on external financing, improving resilience across market cycles. A clear uptrend also supports dividend capacity, buybacks, or deleveraging without compromising growth. Investors view persistent growth in free cash flow as evidence of disciplined capital allocation and durable economics. Sustained improvement typically correlates with higher valuation certainty and lower downside risk.",
-            "input": "Annual free cashflow series",
+            "inputs": None,
             "method": "Mann–Kendall trend test on the free cash flow series.",
             "criteria": "Positive Kendall’s tau > 0 and p-value < 0.10."
         },
         "cash_and_equivalents": {
             "fancy_name": "Cash and Cash Equivalents Stable & Increasing",
             "description": "Rising cash and equivalents indicate building liquidity and strategic flexibility. A healthy cash buffer allows the firm to withstand shocks, negotiate from strength, and pursue value-accretive opportunities. Consistent accumulation suggests prudent working capital discipline and measured reinvestment. It can also lower financing costs by improving perceived credit quality. A clear upward trend is a supportive backdrop for future capital deployment.",
-            "input": "Annual cash and cash equivalents series",
+            "inputs": None,
             "method": "Mann–Kendall trend test on the cash and cash equivalents series.",
             "criteria": "Positive Kendall’s tau > 0 and p-value < 0.10."
         },
         "earning_per_share": {
             "fancy_name": "EPS Stable & Increasing",
             "description": "A persistent rise in earnings per share signals improving profitability per unit of ownership. It often reflects growth in revenues, margin expansion, and thoughtful capital allocation. Compounding EPS tends to compress perceived risk and can justify higher multiples. Stable trajectories are preferred over volatile spikes, as they are easier to underwrite. Sustained increases typically align with stronger competitive positioning and execution.",
-            "input": "Annual EPS (earning per share) series",
+            "inputs": None,
             "method": "Mann–Kendall trend test on EPS.",
             "criteria": "Positive Kendall’s tau > 0 and p-value < 0.10."
         },
         "book_value_per_share": {
             "fancy_name": "BVPS Stable & Increasing",
             "description": "Growing book value per share indicates net assets accruing to shareholders over time. It captures the compounding effect of retained earnings and prudent balance-sheet management. A steady climb suggests that intrinsic value is accumulating even when market prices fluctuate. This measure is particularly useful for capital-intensive or asset-heavy businesses. Persistent BVPS growth supports long-term return potential and downside protection.",
-            "input": "Annual BVPS (book value per share) series",
+            "inputs": None,
             "method": "Mann–Kendall trend test on BVPS.",
             "criteria": "Positive Kendall’s tau > 0 and p-value < 0.10."
         },
         "net_profit_margin": {
             "fancy_name": "Net Profit Margin Stable & Increasing",
             "description": "Improving net profit margins demonstrate operating leverage and cost discipline. Margin expansion often reflects pricing power, mix shift, or structural efficiency gains. Durable margin increases enhance cash generation and reinvestment capacity. They also buffer volatility during demand slowdowns. Consistent upward movement reinforces quality of earnings and business resilience.",
-            "input": "Annual net profit margin series",
+            "inputs": None,
             "method": "Mann–Kendall trend test on net profit margin.",
             "criteria": "Positive Kendall’s tau > 0 and p-value < 0.10."
         },
         "return_on_equity": {
             "fancy_name": "Return on Equity Stable & Increasing",
             "description": "Rising ROE indicates increasingly efficient conversion of equity into profits. It often captures better utilization of assets, stronger margins, or improved capital structure. Persistent improvement compounds shareholder value and can justify premium valuations. Stability is important, as erratic ROE can reflect transient accounting or leverage effects. A clean, positive trend supports the thesis of a strengthening franchise.",
-            "input": "Annual return on equity series",
+            "inputs": None,
             "method": "Mann–Kendall trend test on ROE.",
             "criteria": "Positive Kendall’s tau > 0 and p-value < 0.10."
         }
@@ -747,42 +748,42 @@ CRITERION: dict = {
         "enterprise_profits": {
             "fancy_name": "Enterprise Profit Threshold",
             "description": "Enterprise profit gauges operating earning power relative to the full asset base employed. A sufficiently high level suggests that the firm clears its opportunity cost with a robust margin of safety. Passing the threshold today indicates competitive strength rather than cyclical luck. This constraint also filters out businesses that rely on leverage or accounting quirks to appear profitable. Meeting a demanding bar now sets a high-quality baseline for forward returns.",
-            "input": "EBIT and total assets",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
-            "criteria": "enterprise_profit must be positive and ≥ 0.18."
+            "criteria": "Enterprise Profit must be ≥ 0.18."
         },
         "price_to_book": {
             "fancy_name": "Price-to-Book Discipline",
             "description": "A bounded price-to-book multiple enforces valuation discipline against balance-sheet value. It reduces downside from sentiment swings and exuberant expectations. Reasonable PB levels are especially relevant in asset-heavy or financial businesses. Capping the multiple helps keep expectations aligned with tangible compounding. This rule is a practical guardrail when earnings are temporarily noisy.",
-            "input": "The current PB ratio",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
             "criteria": "0 < PB ≤ 3."
         },
         "peg_ratio": {
             "fancy_name": "PEG Reasonableness",
             "description": "The PEG ratio relates valuation to expected earnings growth, helping to avoid paying too much for momentum. A ceiling encourages investors to require growth at a fair price rather than any price. It is a coarse tool, but practical for quickly screening. Keeping PEG in check reduces reliance on flawless execution to earn acceptable returns. This constraint complements other quality and profitability gates.",
-            "input": "Trailing PEG ratio",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
             "criteria": "0 < PEG ≤ 1."
         },
         "return_on_equity": {
             "fancy_name": "Minimum Return on Equity",
             "description": "A minimum ROE ensures the business generates attractive profits relative to shareholder capital. High ROE firms can reinvest internally at compelling rates or return capital efficiently. This threshold also screens out low-quality franchises masquerading behind leverage. Sustained ROE above the bar is a hallmark of durable advantages or superior execution. It aligns today’s profitability with the compounding you expect tomorrow.",
-            "input": "The latest Return on equity (ROE) return on equity",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
             "criteria": "ROE ≥ 0.15."
         },
         "price_earning": {
             "fancy_name": "PE Versus Industry",
             "description": "Comparing PE to the industry keeps valuation anchored to peers facing similar economics. It helps avoid overpaying during hot cycles or thematic manias. Staying below the sector bar leaves room for multiple expansion if execution proves out. It also mitigates the risk of regime shifts that compress high multiples. The rule balances absolute prudence with relative realism.",
-            "input": "The latest Price-to-Earnings (PE) and INDUSTRIAL_PE_RATIO for the stock’s industry",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
             "criteria": "0 < PE < industry average PE."
         },
         "net_profit_margin": {
             "fancy_name": "Net Margin Versus Industry",
             "description": "A margin above industry norms implies stronger pricing power, mix, or efficiency. It hints at differentiation that competitors find hard to copy. Superior margins translate into more self-funded growth and better shock absorption. It also reduces the dependence on leverage or aggressive accounting to hit targets. Exceeding the peer bar today supports confidence in forward economics.",
-            "input": "The latest Net profit margin (NPM) and INDUSTRIAL_NPM_RATIO for the stock’s industry",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
             "criteria": "NPM > industry average net margin."
         }
@@ -792,42 +793,42 @@ CRITERION: dict = {
         "free_cashflow": {
             "fancy_name": "Free Cash Flow Momentum",
             "description": "A latest growth rate above the historical average indicates improving momentum. It suggests that recent execution or market dynamics are turning more favorable. Positive momentum increases the likelihood that near-term forecasts will be met or exceeded. This supports higher confidence in capital deployment and valuation. It is a pragmatic check that recent data are trending in the right direction.",
-            "input": "YoY growth of free cash flow over ~5 years",
+            "inputs": None,
             "method": "Compare latest YoY growth to the mean of YoY growth history.",
             "criteria": "Latest YoY growth > mean YoY growth."
         },
         "cash_and_equivalents": {
             "fancy_name": "Cash and Equivalents Momentum",
             "description": "An accelerating growth rate in cash builds optionality for investment and defense. It often reflects operational discipline and prudent capital planning. Momentum here can foreshadow buybacks, acquisitions, or deleveraging. It also cushions volatility in working capital and macro shocks. Stronger recent growth versus average is a constructive signal.",
-            "input": "YoY growth of cash and cash equivalents over ~5 years",
+            "inputs": None,
             "method": "Compare latest YoY growth to the mean of YoY growth history.",
             "criteria": "Latest YoY growth > mean YoY growth."
         },
         "earning_per_share": {
             "fancy_name": "EPS Momentum",
             "description": "EPS growth running above its average hints at improving profitability dynamics. This may stem from mix, pricing, or scale benefits coming through more strongly. Momentum increases the chance of positive revisions and sentiment follow-through. It can also validate the sustainability of earlier efficiency gains. Surpassing the historical average is a practical forward-tilted confirmation.",
-            "input": "YoY growth of EPS over ~5 years",
+            "inputs": None,
             "method": "Compare latest YoY growth to the mean of YoY growth history.",
             "criteria": "Latest YoY growth > mean YoY growth."
         },
         "book_value_per_share": {
             "fancy_name": "BVPS Momentum",
             "description": "When BVPS growth exceeds its average, retained value accumulation is accelerating. This indicates stronger earnings retention or fewer charges eroding equity. Faster compounding improves long-term intrinsic value trajectories. It also supports more self-financed reinvestment. Momentum above average is an encouraging forward signal.",
-            "input": "YoY growth of BVPS over ~5 years",
+            "inputs": None,
             "method": "Compare latest YoY growth to the mean of YoY growth history.",
             "criteria": "Latest YoY growth > mean YoY growth."
         },
         "net_profit_margin": {
             "fancy_name": "Margin Momentum",
             "description": "Recent margin gains above average imply durable operational improvements are taking hold. This could reflect better mix, productivity, or pricing discipline. Elevated momentum improves cash conversion and cushions cyclical episodes. It supports more confident reinvestment and competitive responses. Exceeding the historical mean underscores strengthening unit economics.",
-            "input": "YoY growth of net profit margin over ~5 years",
+            "inputs": None,
             "method": "Compare latest YoY growth to the mean of YoY growth history.",
             "criteria": "Latest YoY growth > mean YoY growth."
         },
         "return_on_equity": {
             "fancy_name": "ROE Momentum",
             "description": "An ROE growth rate that outpaces its average suggests improving capital efficiency. It points to better asset turns, margins, or optimization of the capital stack. Persistent momentum reduces reliance on external capital for growth. It also enhances the durability of compounding when reinvested. Beating the average signals forward improvement rather than mere mean reversion.",
-            "input": "YoY growth of ROE over ~5 years",
+            "inputs": None,
             "method": "Compare latest YoY growth to the mean of YoY growth history.",
             "criteria": "Latest YoY growth > mean YoY growth."
         }
@@ -837,42 +838,42 @@ CRITERION: dict = {
         "current_ratio": {
             "fancy_name": "Short-Term Liquidity Buffer",
             "description": "A strong current ratio indicates the ability to cover near-term obligations comfortably. It reduces refinancing risk and supply-chain fragility. Healthy liquidity also creates room to act on tactical opportunities. It typically correlates with more stable operations through cycles. Maintaining a robust buffer is a hallmark of prudent financial management.",
-            "input": "Current assets and current liabilities",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
             "criteria": "Current ratio ≥ 1.5."
         },
         "debt_to_equity": {
             "fancy_name": "Leverage Prudence",
             "description": "Moderate leverage limits downside in cyclical or shock scenarios. Lower debt loads preserve strategic flexibility and reduce interest burden. A conservative capital structure also cushions covenant pressure. It improves survivability during liquidity squeezes. Keeping D/E in check aligns with durable compounding.",
-            "input": "Total liabilities and total equity",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
             "criteria": "Debt-to-equity ≤ 0.5."
         },
         "beneish_m": {
             "fancy_name": "Earnings Quality Screen (Beneish M-Score)",
             "description": "The Beneish M-Score flags patterns consistent with aggressive accounting. A sufficiently low score reduces the probability of manipulation risk. This serves as a protective filter before deeper diligence. Passing the bar does not prove innocence but lowers suspicion. It complements other quality and consistency checks.",
-            "input": "Computed Beneish M-Score series",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
-            "criteria": "M-Score ≤ −2.22."
+            "criteria": "Beneish M-Score ≤ −2.22."
         },
         "altman_z": {
             "fancy_name": "Financial Distress Risk (Altman Z-Score)",
             "description": "The Altman Z-Score summarizes balance-sheet and profitability signals into a distress probability proxy. Higher scores generally imply lower bankruptcy risk. Clearing the threshold provides a baseline of solvency comfort. It helps compare firms across sectors and cycles with a consistent yardstick. This safeguard pairs well with liquidity and leverage checks.",
-            "input": "Computed Altman Z-Score series.",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
-            "criteria": "Z-Score ≥ 1.80."
+            "criteria": "Altman Z-Score ≥ 1.80."
         },
         "net_insider_purchases": {
-            "fancy_name": "Insider Trading Balance",
+            "fancy_name": "Insider Trading Balance  (%)",
             "description": "Net insider buying can signal management’s confidence in intrinsic value. Selling is not always negative, but persistent net selling can be a caution. Observing the balance over time contextualizes valuation and outlook. This indicator complements fundamental metrics with behavioral evidence. A neutral-to-positive tilt supports alignment with shareholders.",
-            "input": "Net insider purchases metric over a recent window",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
             "criteria": "Net insider purchases ≥ −0.10 (i.e., not materially negative)."
         },
         "debt_coverage": {
             "fancy_name": "Operating Cash Flow to Debt Coverage",
             "description": "Strong operating cash flow relative to debt indicates manageable balance-sheet pressure. It implies the firm can service obligations from core operations. This reduces dependence on capital markets during stress. Higher coverage also supports optionality for growth. A clear cushion lowers financial risk and improves durability.",
-            "input": "Operating cash flow and total liabilities (latest point comparison)",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
             "criteria": "Operating cash flow > 20% of total liabilities."
         }
@@ -882,44 +883,44 @@ CRITERION: dict = {
         "dividend": {
             "fancy_name": "Dividend Presence Over Recent Years",
             "description": "A consistent dividend record signals a shareholder-friendly capital policy. It indicates confidence in recurring cash generation. Even modest, steady payments can discipline capital allocation. The presence or absence of dividends should be judged alongside reinvestment opportunities. The goal is sustainability rather than cosmetic yield.",
-            "input": "Dividend per share history over ~5 years",
+            "inputs": None,
             "method": "All-zero check across a 5 years' window.",
             "criteria": "All five most recent annual DPS values are non-zero (or per your boolean condition)."
         },
         "dividend_yield": {
-            "fancy_name": "Minimum Dividend Yield",
+            "fancy_name": "Minimum Dividend Yield  (%)",
             "description": "A baseline yield ensures a tangible cash return while you wait for compounding. It can cushion drawdowns and smooth total returns. Yield should be supported by underlying free cash flow rather than financial engineering. Excessive yield may signal risk, so a modest floor is prudent. The aim is adequate payout without starving growth.",
-            "input": "Latest dividend yield derived from price and DPS",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
             "criteria": "Dividend yield > 1.5%."
         },
         "dividend_streak": {
             "fancy_name": "Dividend Continuity",
             "description": "A clean dividend streak reflects discipline and visibility into cash flows. Breaks or cuts can indicate stress or shifting priorities. However, pauses may be rational if reinvestment is superior. Context matters, but sustained continuity generally deserves credit. Monitoring the streak helps balance income and growth objectives.",
-            "input": "Full dividend per share history",
+            "inputs": None,
             "method": "Presence of any zeros across the history window.",
             "criteria": "No zero-payment years within the evaluated window."
         },
         "dividend_volatile": {
-            "fancy_name": "Dividend Volatility Check",
+            "fancy_name": "Dividend Volatility Check  (%)",
             "description": "Large dividend drops can undermine income reliability and signal deeper issues. Stability supports investor confidence and valuation resilience. Occasional adjustments are acceptable if tied to disciplined capital allocation. The focus is avoiding repeated or severe cuts inconsistent with fundamentals. A low incidence of large declines is preferred.",
-            "input": "Year-over-year DPS changes over ~10 years",
+            "inputs": None,
             "method": "Detect any YoY DPS drop ≥ 10%.",
             "criteria": "No YoY DPS decline of 10% or more in the lookback."
         },
         "dividend_trend": {
             "fancy_name": "Dividend Stable & Increasing",
             "description": "A positive long-term trend in dividends per share indicates a company’s growing and repeatable cash distribution capacity. It often reflects expanding free cash flow, disciplined capital allocation, and healthy competitive positioning. A statistically meaningful uptrend helps distinguish durable improvement from noise or one-off policy changes. This confidence supports a steadier income profile and can bolster valuation resilience. Clear upward momentum in the dividend record is therefore an encouraging sign for long-term shareholders.",
-            "input": "Dividend per share time series",
+            "inputs": None,
             "method": "Mann–Kendall trend test on dividends per share (tau and p-value reported together).",
             "criteria": "Positive Kendall’s tau and p-value < 0.10."
         },
         "dividend_payout_ratio": {
             "fancy_name": "Payout Sustainability",
             "description": "A moderate payout ratio balances income today with reinvestment for tomorrow. It reduces the risk of forced cuts during soft patches. Sustainable payouts are typically backed by recurring free cash flow, not leverage. A sensible ceiling leaves room for growth capex and buybacks. The aim is endurance rather than maximum distribution.",
-            "input": "Dividend per share and earnings per share",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
-            "criteria": "0% < payout ratio < 60%."
+            "criteria": "0 < payout ratio < 0.60."
         }
     },
 
@@ -927,42 +928,42 @@ CRITERION: dict = {
         "momentum": {
             "fancy_name": "Real GDP Growth Momentum",
             "description": "Macroeconomic tailwinds improve demand visibility and pricing conditions. A country growing faster than its long-term trend or the world average is supportive for corporate fundamentals. Positive momentum reduces the likelihood of broad-based revenue shocks. It also raises the base rate for investment and employment. Favorable growth regimes compound business quality advantages.",
-            "input": "Country real GDP growth (3-yr average vs 10-yr average or world average) and last-year print",
+            "inputs": None,
             "method": "Deterministic comparative rule.",
             "criteria": "3-yr avg ≥ world avg (or country 10-yr avg) AND last year ≥ 0."
         },
         "inflation_stability": {
             "fancy_name": "Inflation Level and Stability",
             "description": "Benign inflation preserves real purchasing power and planning certainty. Excess volatility distorts pricing, margins, and working capital. A contained level with low variability supports steady multiples. It also reduces policy shock risk that can hit growth assets disproportionately. Stability enables quality businesses to compound quietly.",
-            "input": "CPI inflation level and 5-yr standard deviation",
+            "inputs": None,
             "method": "Deterministic thresholds on level and variability.",
             "criteria": "Latest CPI ≤ 5% AND 5-yr std-dev ≤ 3 percentage points."
         },
         "real_interest_rate": {
-            "fancy_name": "Real Rate Sanity Range",
+            "fancy_name": "Real Rate Sanity Range (%)",
             "description": "Real rates summarize policy stance and credit conditions after inflation. Extremely negative real rates can mask fragility, while very high rates can choke growth. A middle range supports balanced incentives for saving and investment. It helps avoid boom-bust dynamics harmful to equity cash flows. Staying within a sane band reduces macro downside skew.",
-            "input": "Latest lending rate minus CPI inflation",
+            "inputs": None,
             "method": "Deterministic band rule.",
             "criteria": "−2% < real rate < 6%."
         },
         "fx_trend": {
-            "fancy_name": "FX Trend versus Base Currency",
+            "fancy_name": "FX Trend versus Base Currency  (%)",
             "description": "Persistent currency depreciation erodes foreign returns and may signal structural imbalances. A modest pace is tolerable, especially if offset by strong local returns. Limiting depreciation risk avoids over-reliance on multiple expansion. It also simplifies underwriting of long-dated cash flows. A contained trend keeps macro headwinds manageable.",
-            "input": "3-yr CAGR of local currency vs base currency (or USD)",
+            "inputs": None,
             "method": "Deterministic ceiling on FX depreciation CAGR.",
             "criteria": "FX depreciation CAGR ≤ 5% per year."
         },
         "external_balance": {
-            "fancy_name": "External Balance Health",
+            "fancy_name": "External Balance Health  (%)",
             "description": "A manageable current account deficit reduces vulnerability to external funding shocks. Improvements relative to recent history are particularly constructive. Healthier balances typically translate into more stable policy and FX. They also reflect competitiveness and balanced domestic demand. This backdrop lowers macro tail-risk for corporates.",
-            "input": "Latest current account balance (% GDP) vs 5-yr average",
+            "inputs": None,
             "method": "Deterministic threshold and improvement rule.",
             "criteria": "Latest ≥ −3% of GDP AND ≥ 5-yr average."
         },
         "fiscal_sustainability": {
-            "fancy_name": "Public Debt Sustainability",
+            "fancy_name": "Public Debt Sustainability  (%)",
             "description": "Lower public debt burdens reduce the need for distortionary taxes or austerity. It leaves room for counter-cyclical policy during downturns. Sustainable fiscal metrics support lower risk premia across the economy. They also stabilize investor expectations and capital flows. A prudent fiscal stance is a quiet tailwind for equities.",
-            "input": "Latest central government debt (% GDP)",
+            "inputs": None,
             "method": "Deterministic threshold rule.",
             "criteria": "Debt ≤ 80% of GDP."
         }
@@ -970,138 +971,102 @@ CRITERION: dict = {
 }
 
 
+
 VALUATION: dict = {
     "price_earning_multiples": {
         "fancy_name": "Price-to-Earnings Multiples Method",
-        "description": "This method estimates a fair price by applying a representative price-to-earnings multiple to earnings per share. It then scales the value by a conservative growth assumption over a chosen horizon. The result is discounted back to the present using a user-selected discount rate. The approach is intuitive and mirrors how many market participants benchmark similar companies. It is most useful when earnings quality is steady and the chosen multiple is grounded in a relevant peer group or long-run history.",
-        "feasibility": "This method works best for companies with relatively stable, repeatable earnings and a clear peer set. It is less reliable when earnings are cyclical, distorted by one-offs, or when the market multiple is undergoing a regime shift. It also struggles for early-stage or highly loss-making firms where earnings are not yet meaningful.",
+        "description": "This method estimates fair value by applying a representative P/E multiple to earnings per share, then projecting forward with conservative growth assumptions. The projected value is discounted back to present value using an appropriate discount rate. This approach mirrors how market participants benchmark similar companies and is intuitive for companies with stable, predictable earnings.",
+        "feasibility": "Works best for companies with stable, repeatable earnings and clear peer comparables. Less reliable for cyclical businesses, early-stage companies, or when the market multiple is undergoing structural shifts. Requires confidence in both earnings quality and the sustainability of the chosen multiple.",
         "inputs": [
-            "Earnings Per Share  (3y Median)",
-            "Price To Earnings Multiple (Representative or Median)",
+            "Earnings Per Share (3-year median)",
+            "Price-to-Earnings Multiple (representative or median)",
             "Conservative Growth Rate",
             "Discount Rate",
-            "Stage-1 Years"
+            "Projection Years"
         ],
-        # Formula (ASCII variables):
-        # P0 = ( EPS * PE * (1 + g)^N ) / (1 + r)^N
-        "formula": r"P0 = \\dfrac{EPS \\cdot PE \\cdot (1 + g)^{N}}{(1 + r)^{N}}",
     },
 
     "discounted_cash_flow_one_stage": {
-        "fancy_name": "Discounted Cash Flow (One-Stage, Fading Growth)",
-        "description": "This model projects free cash flow for a single stage where growth fades each year by a decline factor. Each projected free cash flow is discounted back at the chosen discount rate to reflect time value and risk. A terminal value is approximated using a simple multiple of the last discounted free cash flow, preserving your original logic. The sum of discounted flows and terminal value yields equity value, which is divided by shares outstanding to get the fair price. The framework is transparent and easy to communicate to non-specialists.",
-        "feasibility": "This approach works best when free cash flow is a stable, meaningful proxy for distributable economics and the fade profile is reasonable. It is less effective when cash flows are highly volatile, capital intensity is shifting, or reinvestment needs are poorly understood. The simple terminal multiple should be cross-checked against market evidence to avoid anchoring bias.",
+        "fancy_name": "Discounted Cash Flow (One-Stage, Declining Growth)",
+        "description": "This DCF variant projects free cash flow through a single stage where growth declines steadily each year. Each year's cash flow is discounted to present value, and a terminal value captures the business's perpetual worth using a conservative multiple. The model is transparent and captures the natural fade of growth rates over time as businesses mature.",
+        "feasibility": "Suitable when free cash flow is stable and meaningful, and when a declining growth pattern reasonably reflects business maturity. Less effective for highly volatile cash flows or businesses undergoing structural shifts in capital intensity. The terminal multiple should be validated against market comparables.",
         "inputs": [
-            "Free Cash Flow (3y Median)",
-            "Conservative Growth Rate",
-            "Annual Decline Rate",
+            "Free Cash Flow (3-year median)",
+            "Initial Growth Rate",
+            "Annual Growth Decline Rate",
             "Discount Rate",
-            "Stage-1 Years",
+            "Projection Years",
             "Shares Outstanding",
-            "Terminal Multiple"
+            "Terminal Multiple (typically 10-15x)"
         ],
-        # Growth each year: g_t = g * (1 - d)^{t-1}
-        # FCF_t = FCF_0 * Prod_{i=1..t} (1 + g_i)
-        # PV = Sum_{t=1..N} FCF_t / (1 + r)^t
-        # TV (presented like code): k * (FCF_N / (1 + r)^N), with k = 12
-        # P0 = ( PV + TV ) / S
-        "formula": r"g_t = g \\cdot (1 - d)^{t-1},\\quad FCF_t = FCF_0 \\prod_{i=1}^{t} (1 + g_i) \\\\ PV = \\sum_{t=1}^{N} \\dfrac{FCF_t}{(1 + r)^{t}},\\quad TV = k \\cdot \\dfrac{FCF_{N}}{(1 + r)^{N}} \\\\ P0 = \\dfrac{PV + TV}{S}",
     },
 
     "discounted_cash_flow_two_stage": {
-        "fancy_name": "Discounted Cash Flow (Two-Stage With Terminal Growth)",
-        "description": "This model splits the forecast into an early stage with fading growth and a second stage with stable growth. Free cash flow is projected through both stages and discounted at the selected discount rate. The terminal value is computed using a Gordon-style formula based on the final stage cash flow and a terminal growth rate. Summing the present values across both stages and the terminal value gives equity value, which is then divided by shares outstanding. The structure captures transitions from higher growth toward maturity in a disciplined way.",
-        "feasibility": "This approach is well-suited to companies transitioning from elevated growth toward a stable, mature phase. It can mislead if terminal growth exceeds plausible long-run nominal GDP growth or if discount rates and reinvestment needs are inconsistent with the growth path. Reliable cash flow baselines and sensible horizon lengths are key to meaningful results.",
+        "fancy_name": "Discounted Cash Flow (Two-Stage Model)",
+        "description": "A more sophisticated DCF that splits projections into two phases: an initial high-growth stage with declining growth, followed by a stable-growth stage. Terminal value is calculated using the Gordon Growth Model. This structure explicitly models the transition from growth to maturity, making it ideal for companies in transition phases.",
+        "feasibility": "Well-suited for companies transitioning from high growth to maturity. Requires careful estimation of when the transition occurs and what stable growth rate is sustainable long-term. Terminal growth should not exceed long-run GDP growth. The model is sensitive to the relationship between discount rate and terminal growth.",
         "inputs": [
-            "Free Cash Flow  (3y Median)",
-            "Conservative Growth Rate",
-            "Annual Decline Rate",
-            "Terminal Growth Rate",
+            "Free Cash Flow (3-year median)",
+            "Initial Growth Rate",
+            "Growth Decline Rate",
+            "Terminal Growth Rate (typically 2-3%)",
             "Discount Rate",
-            "Stage-1 Years",
-            "Terminal Stage Years",
+            "Stage 1 Years",
+            "Stage 2 Years",
             "Shares Outstanding"
         ],
-        # Stage 1: D_t grows at g1 for t=1..N1
-        # Stage 2: D_{N1+k} grows at g2 for k=1..N2
-        # PV1 = Sum_{t=1..N1} D_t / (1 + k)^t
-        # PV2 = Sum_{k=1..N2} D_{N1+k} / (1 + k)^{N1+k}
-        # TV at T = N1+N2: TV = D_{T+1} / (k - g2), PVTV = TV / (1 + k)^{T}
-        # P0 = PV1 + PV2 + PVTV
-        "formula": r"PV1 = \\sum_{t=1}^{N1} \\dfrac{D_t}{(1 + k)^{t}},\\quad PV2 = \\sum_{k=1}^{N2} \\dfrac{D_{N1+k}}{(1 + k)^{N1+k}} \\\\ TV = \\dfrac{D_{N1+N2+1}}{k - g2},\\quad PVTV = \\dfrac{TV}{(1 + k)^{N1+N2}} \\\\ P0 = PV1 + PV2 + PVTV",
     },
 
     "discounted_dividend_two_stage": {
-        "fancy_name": "Discounted Dividend Model (Two-Stage)",
-        "description": "This model values equity as the present value of future dividends. It projects dividends through an initial growth stage and a subsequent stable stage. A terminal value is derived using a Gordon-style formula based on the final stage dividend and the cost of equity. The sum of discounted dividends and the discounted terminal value yields a fair price per share. The method focuses directly on cash returned to shareholders and is familiar to income-oriented investors.",
-        "feasibility": "This approach works best for firms with a consistent dividend policy and credible growth visibility. It is less suitable for companies that retain most cash for reinvestment, have sporadic payouts, or frequently change their policy. Sensitivity to the relationship between cost of equity and terminal growth is high and should be examined.",
+        "fancy_name": "Dividend Discount Model (Two-Stage)",
+        "description": "This model values equity based solely on future dividend payments to shareholders. Dividends are projected through a high-growth stage and a stable-growth stage, then discounted using the cost of equity. Terminal value captures all dividends beyond the projection period. The method directly focuses on cash returned to shareholders.",
+        "feasibility": "Best for mature companies with consistent dividend policies and predictable payout patterns. Less suitable for companies retaining most earnings for reinvestment or those with sporadic dividend policies. The relationship between cost of equity and terminal growth is critical—small changes can dramatically affect valuation.",
         "inputs": [
-            "Dividend Per Share  (3y Median)",
-            "Conservative Dividend Growth Rate (1y cagr)",
+            "Dividend Per Share (3-year median)",
+            "Initial Dividend Growth Rate",
             "Terminal Dividend Growth Rate",
-            "Cost Of Equity",
-            "Stage-1 Years",
-            "Terminal Stage Years",
+            "Cost of Equity",
+            "Stage 1 Years",
+            "Stage 2 Years"
         ],
-        # Stage 1: D_t grows at g1 for t=1..N1
-        # Stage 2: D_{N1+k} grows at g2 for k=1..N2
-        # PV1 = Sum_{t=1..N1} D_t / (1 + k)^t
-        # PV2 = Sum_{k=1..N2} D_{N1+k} / (1 + k)^{N1+k}
-        # TV at T = N1+N2: TV = D_{T+1} / (k - g2), PVTV = TV / (1 + k)^{T}
-        # P0 = PV1 + PV2 + PVTV
-        "formula": r"PV1 = \\sum_{t=1}^{N1} \\dfrac{D_t}{(1 + k)^{t}},\\quad PV2 = \\sum_{k=1}^{N2} \\dfrac{D_{N1+k}}{(1 + k)^{N1+k}} \\\\ TV = \\dfrac{D_{N1+N2+1}}{k - g2},\\quad PVTV = \\dfrac{TV}{(1 + k)^{N1+N2}} \\\\ P0 = PV1 + PV2 + PVTV",
     },
 
     "return_on_equity": {
-        "fancy_name": "Return On Equity Capitalization Method",
-        "description": "This method projects book value per share and dividend per share forward using a conservative growth assumption. It then estimates terminal value from final-year net income per share by capitalizing it with an earnings-yield proxy based on the average market return. Interim dividends are discounted back alongside the terminal value to determine fair price. The approach ties valuation to core profitability on the shareholders’ equity base. It is intuitive when capital structure and reinvestment dynamics are relatively stable.",
-        "feasibility": "This method works best for established firms where ROE is a meaningful, stable indicator of profitability. It can misrepresent value if leverage is changing rapidly or if ROE is inflated by one-time items. Users should ensure the earnings-yield proxy aligns with the firm’s true risk and growth profile.",
+        "fancy_name": "Return on Equity Capitalization Method",
+        "description": "This approach values the company based on its ability to generate returns on shareholders' equity. It projects both book value and dividends forward, then capitalizes terminal earnings using an earnings yield based on market returns. The method ties valuation directly to profitability on the equity base rather than absolute cash flows.",
+        "feasibility": "Most effective for established companies where ROE is stable and meaningful. Can be misleading if leverage is changing rapidly or if ROE is artificially inflated by one-time items. The earnings yield assumption should align with the company's risk profile and the broader market environment.",
         "inputs": [
-            "Return On Equity (3y Median)",
-            "Book Value Per Share (3y Median)",
-            "Dividend Per Share (3y Median)",
-            "Conservative Growth Rate",
+            "Return on Equity (3-year median)",
+            "Book Value Per Share (3-year median)",
+            "Dividend Per Share (3-year median)",
+            "Growth Rate",
             "Discount Rate",
-            "Average Market Return",
-            "Stage-1 Years",
+            "Average Market Return (earnings yield proxy)",
+            "Projection Years"
         ],
-        # BVPS_N = BVPS_0 * (1 + g)^N
-        # DPS_t = DPS_0 * (1 + g)^t
-        # PV_Dividends = Sum_{t=1..N} DPS_t / (1 + r)^t
-        # NI_N = BVPS_N * ROE
-        # TV = NI_N / m, PVTV = TV / (1 + r)^N
-        # P0 = PV_Dividends + PVTV
-        "formula": r"BVPS_{N} = BVPS_{0}(1 + g)^{N},\\quad DPS_{t} = DPS_{0}(1 + g)^{t} \\\\ PV_{Div} = \\sum_{t=1}^{N} \\dfrac{DPS_{t}}{(1 + r)^{t}},\\quad NI_{N} = BVPS_{N} \\cdot ROE \\\\ TV = \\dfrac{NI_{N}}{m},\\quad PVTV = \\dfrac{TV}{(1 + r)^{N}} \\\\ P0 = PV_{Div} + PVTV",
     },
 
     "excess_return": {
         "fancy_name": "Residual Income (Excess Return) Model",
-        "description": "This model values the firm by capitalizing the difference between its return on equity and its cost of equity, applied to the equity base. The present value of those excess returns is added to the current equity to obtain total equity value. Dividing by shares outstanding gives a fair price per share. The logic emphasizes value creation above the shareholders’ required return. It is particularly helpful when dividends and free cash flow do not fully reflect economic profitability.",
-        "feasibility": "This model works best when ROE and the cost of equity are consistently estimable and reflect steady business economics. It is less reliable when accounting earnings diverge from economic earnings or when equity base measurements are noisy. Care is needed when growth assumptions approach the cost of equity, as the math becomes sensitive.",
+        "description": "This model focuses on value creation above the cost of capital. It calculates the perpetuity value of returns exceeding the required return on equity, then adds this to current book value. The approach emphasizes economic profit rather than accounting profit, making it useful when traditional cash flow measures don't fully capture value creation.",
+        "feasibility": "Works well when ROE and cost of equity are reliably estimable and when accounting accurately reflects economic reality. Less reliable when there's significant divergence between accounting and economic earnings, or when book values are distorted. Highly sensitive when growth approaches the cost of equity.",
         "inputs": [
-            "Return On Equity (3y Median)",
-            "Cost Of Equity",
-            "Conservative Growth Rate",
-            "Total Equity (3y Median)",
+            "Return on Equity (3-year median)",
+            "Cost of Equity",
+            "Growth Rate",
+            "Total Equity (3-year median)",
             "Shares Outstanding"
         ],
-        # ER = (ROE - k) * TE
-        # PV_ER perpetuity with growth g: ER / (k - g)
-        # Equity value = TE + PV_ER
-        # P0 = (TE + ER/(k - g)) / S
-        "formula": r"ER = (ROE - k) \\cdot TE,\\quad P0 = \\dfrac{TE + \\dfrac{ER}{k - g}}{S}",
     },
 
     "graham_number": {
-        "fancy_name": "Graham Number (Earnings And Book Blend)",
-        "description": "The Graham Number is a classic heuristic that blends earnings per share and book value per share. It computes the square root of 22.5 times the product of EPS and BVPS. The constant 22.5 implicitly embeds conservative bounds for price-to-book and price-to-earnings multiples. The result is a single, easily communicated threshold often used as a sanity check. It is not a full valuation model but a pragmatic screening anchor.",
-        "feasibility": "This metric works best as a quick sense-check for established, profitable businesses with tangible equity. It is far less informative for asset-light, high-growth, or loss-making companies where book value and current earnings are weak proxies for value. It should be complemented with deeper cash-flow-based or competitive-advantage analyses.",
+        "fancy_name": "Graham Number (Conservative Valuation Anchor)",
+        "description": "Benjamin Graham's classic formula combines earnings and book value into a single valuation benchmark. The constant 22.5 implicitly assumes a P/E of 15 and a P/B of 1.5—conservative multiples for a fairly-valued stock. This is not a precise valuation model but rather a quick sanity check and screening tool.",
+        "feasibility": "Most useful as a preliminary screen for established, profitable companies with tangible assets. Far less informative for asset-light businesses, high-growth companies, or those with negative earnings. Should be used alongside more comprehensive valuation methods rather than as a standalone measure.",
         "inputs": [
-            "Earnings Per Share (3y Median)",
-            "Book Value Per Share (3y Median)"
+            "Earnings Per Share (3-year median)",
+            "Book Value Per Share (3-year median)"
         ],
-        # P0 = sqrt(22.5 * EPS * BVPS)
-        "formula": r"P0 = \\sqrt{\\,22.5 \\cdot EPS \\cdot BVPS\\,}",
     },
 }
 
