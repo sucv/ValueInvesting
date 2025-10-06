@@ -83,6 +83,11 @@ The system auto-calculates parameters, but you can override any value to reflect
 ### Step 4: Generate Your AI Analyst Report
 **Get a comprehensive equity research report written by AI:**
 
+Exanoke report:
+- FIVN: [Gemini 2.5 Flash](https://g.co/gemini/share/644f7b7cf0b5)
+- CPRX: [Gemini 2.5 Flash](https://g.co/gemini/share/45158ac2bf0d)
+- INMB: [Gemini 2.5 Flash](https://g.co/gemini/share/076cdc65f4aa)
+
 1. **Find recent fiscal reports online:**
    - Search: `[Company Name] 10-K SEC filing` or `[Company Name] annual report investor relations`
    - Copy the URL of the most recent 10-K (annual) or 10-Q (quarterly) report
