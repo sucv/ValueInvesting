@@ -98,7 +98,7 @@ The system auto-calculates parameters, but you can override any value to reflect
    - Copy the entire prompt text
 
 4. **Get your AI report:**
-   - Paste the prompt into Gemini 2.5 Pro (recommended) or Claude
+   - Paste the prompt into your AI, such as Gemini 2.5 Pro/Flash (recommended), Claude, ChatGPT, etc.
    - Enable "deep thinking" or "reasoning" mode if available
    - Enable web search for latest news context
    - The AI will generate a detailed investment report with:
