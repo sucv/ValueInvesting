@@ -300,6 +300,7 @@ def ensure_default_param_keys() -> None:
     st.session_state.setdefault("url_extra", "https://example.com/extra")
     st.session_state.setdefault("ticker_input", "AAPL")
     st.session_state.setdefault("_show_prompt_success", False)
+    st.session_state.setdefault("_show_run_success", False)
     st.session_state.setdefault("_top_error", "")
     st.session_state.setdefault("_pending_params", {})
     st.session_state.setdefault("_apply_pending_params", False)
@@ -317,6 +318,7 @@ def _on_run_clicked_reset_urls_if_ticker_changed() -> None:
         st.session_state["url_extra"] = "https://example.com/extra"
         st.session_state["generated_prompt_text"] = ""
         st.session_state["_show_prompt_success"] = False
+        st.session_state["_show_run_success"] = False
         st.session_state["user_modified_params"] = set()
 
         # Reset params to defaults
@@ -1824,6 +1826,10 @@ def main() -> None:
     ticker_changed = (st.session_state.last_ticker != ticker_symbol)
 
     if run_pressed:
+        # Clear previous success messages when starting new run
+        st.session_state["_show_run_success"] = False
+        st.session_state["_show_prompt_success"] = False
+
         try:
             if (st.session_state.stock is None) or ticker_changed:
                 with st.spinner("Fetching stock & building evaluation..."):
@@ -1879,6 +1885,7 @@ def main() -> None:
 
             st.session_state["_top_error"] = ""
             st.session_state.has_run = True
+            st.session_state["_show_run_success"] = True
             st.rerun()
 
         except ValueError as e:
@@ -1888,6 +1895,7 @@ def main() -> None:
             st.session_state.stock = None
             st.session_state.fair_value_payload = None
             st.session_state["_show_prompt_success"] = False
+            st.session_state["_show_run_success"] = False
 
         except Exception as e:
             msg = f"Failed to fetch or compute for '{ticker_symbol}'. Please try again. Details: {e}"
@@ -1897,11 +1905,24 @@ def main() -> None:
             st.session_state.stock = None
             st.session_state.fair_value_payload = None
             st.session_state["_show_prompt_success"] = False
+            st.session_state["_show_run_success"] = False
 
     st.title("Value Investing Dashboard")
 
+    # Show success notifications
+    if st.session_state.get("_show_run_success"):
+        ticker_display = st.session_state.get("last_ticker", "")
+        if ticker_display:
+            st.success(f"✓ Analysis completed for **{ticker_display}**, switch to other tabs to see.")
+        else:
+            st.success("✓ Analysis completed successfully, switch to other tabs to see.")
+
     if st.session_state.get("_show_prompt_success"):
-        st.success("Prompt generated. Open the **Prompts** tab to copy it.")
+        ticker_display = st.session_state.get("last_ticker", "")
+        if ticker_display:
+            st.success(f"✓ Prompt generated for **{ticker_display}**. Open the **Prompts** tab to copy it.")
+        else:
+            st.success("✓ Prompt generated. Open the **Prompts** tab to copy it.")
 
     insert_vertical_row_spacing(6)
 
