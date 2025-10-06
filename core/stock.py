@@ -144,7 +144,7 @@ class Stock:
         self.current_ratio = _safe_div(self.current_assets, self.current_liabilities).rename("current_ratio")
 
         self.earning_yoy_growth = _safe_yoy_growth(self.total_revenue).rename("earning_yoy_growth")
-        self.stock_prices_atm = _get_price_at(self.total_equity, self.prices).rename("price_at")
+        self.stock_prices_atm = _get_price_at(self.total_equity, self.prices).rename("stock_prices_atm")
 
         self.market_cap = _safe_mul(self.stock_prices_atm, self.shares_outstanding).rename("market_cap")
 

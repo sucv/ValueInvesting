@@ -214,14 +214,13 @@ DERIVED_METRICS = {
     "dividend_per_share_cagr":            {"fancy_name": "Dividend Per Share CAGR",            "kind": "scalar"},
 
     # --- Series ---
-    "stock_prices_atm":                   {"fancy_name": "Stock Prices",                     "kind": "series"},
+    "stock_prices_atm":                   {"fancy_name": "Price at Report Date",                     "kind": "series"},
     "debt_to_equity":                     {"fancy_name": "Debt to Equity",                     "kind": "series"},
     "net_profit_margin":                  {"fancy_name": "Net Profit Margin",                  "kind": "series"},
     "return_on_equity":                   {"fancy_name": "Return on Equity",                   "kind": "series"},
     "current_ratio":                      {"fancy_name": "Current Ratio",                      "kind": "series"},
 
     "earning_yoy_growth":                 {"fancy_name": "Earnings YoY Growth",                "kind": "series"},
-    "price_at":                           {"fancy_name": "Price at Report Date",               "kind": "series"},
     "market_cap":                         {"fancy_name": "Market Capitalization",              "kind": "series"},
 
     "price_to_book":                      {"fancy_name": "Price to Book",                      "kind": "series"},
