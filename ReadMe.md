@@ -51,6 +51,7 @@ Type a stock ticker in the sidebar text field:
 - **US stocks:** AAPL, MSFT, GOOGL, etc.
 - **Non-US stocks:** Use Yahoo Finance format (see regional reference below)
   - Japan: `9697.T` | Hong Kong: `0700.HK` | London: `ULVR.L` | Poland: `CDR.WA`
+  - See [Yahoo Finance Ticker Format Reference](#yahoo-finance-ticker-format-reference) for more examples.
 
 [↑ Return to Table of Contents](#table-of-contents)
 
