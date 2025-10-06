@@ -1910,9 +1910,6 @@ def main() -> None:
         st.error(_top_error)
         insert_vertical_row_spacing(8)
 
-    if st.session_state.stock is None or st.session_state.fair_value_payload is None:
-        st.info("Enter a ticker and click **Run** to load data.")
-        return
 
     stock_obj = st.session_state.stock
     try:
@@ -1937,9 +1934,9 @@ def main() -> None:
         unsafe_allow_html=True,
     )
 
-    # Three tabs: Overview, Details (renamed from Fact Sheet), Prompts
-    tab_overview, tab_data, tab_valuation, tab_evaluation, tab_prompts, tab_manual = st.tabs(
-        ["Overview", "Data Points", "Valuation", "Evaluation", "Prompts", "Manual"]
+    # Six tabs: Manual shown first and always, others conditional on data
+    tab_manual, tab_overview, tab_data, tab_valuation, tab_evaluation, tab_prompts = st.tabs(
+        ["Manual", "Overview", "Data Points", "Valuation", "Evaluation", "Prompts"]
     )
 
     fair_values = st.session_state.fair_value_payload
@@ -1971,117 +1968,134 @@ def main() -> None:
             st.session_state["_show_prompt_success"] = False
             st.error(f"Failed to generate prompt. Details: {e}")
 
-    with tab_overview:
-        # Row 1: Price Chart + Fair Value Table
-        col_price_chart, col_fair_value = st.columns([0.6, 0.4], gap="large")
-
-        with col_price_chart:
-            st.markdown("#### Historical Price since 10-yr Ago")
-            price_df = getattr(stock_obj, "prices", None)
-            try:
-                if hasattr(stock_obj, "get_prices_series"):
-                    price_df = stock_obj.get_prices_series()
-            except Exception:
-                pass
-            if isinstance(price_df, pd.DataFrame) and "Close" in price_df.columns and not price_df.empty:
-                chart = build_price_line_chart(price_df.tail(3650 + 30), height=350,
-                                               margin=dict(l=5, r=5, t=5, b=5))
-                st.plotly_chart(chart, use_container_width=True)
-            else:
-                st.caption("No price data available.")
-
-        with col_fair_value:
-            current_price = getattr(stock_obj, "current_price", np.nan) or np.nan
-            render_fair_value_table_card(current_price, fair_values)
-
-        st.markdown("---")
-        # insert_vertical_row_spacing(30)
-
-        # Row 2: Radar Chart + Evaluation Checklist
-        col_radar_chart, col_checklist = st.columns([0.6, 0.4], gap="large")
-
-        with col_radar_chart:
-            st.markdown("#### Evaluation Snowflakes")
-            category_scores = compute_category_scores_for_radar(evaluation_payload)
-            radar_labels = ["past", "present", "future", "health", "dividend", "macroeconomics"]
-            radar_values = [category_scores.get(k, 0.0) for k in radar_labels]
-            radar_fig = build_radar_chart(radar_labels, radar_values, height=350, edge_pad=0.10,
-                                          margin=dict(l=5, r=5, t=5))
-            st.plotly_chart(radar_fig, use_container_width=True)
-
-        with col_checklist:
-            render_evaluation_checklist_card(evaluation_payload, CRITERION)
-
-        # st.markdown("---")
-        # insert_vertical_row_spacing(30)
-
-        # Row 3: Tabbed section with Key Ratios, News, Officers, About
-        tab_key_ratios, tab_news, tab_officers, tab_about = st.tabs(["Key Ratios", "News", "Officers", "About"])
-
-        with tab_key_ratios:
-            key_ratios_payload = (payload or {}).get("key_ratios", [])
-            if not key_ratios_payload:
-                key_ratios_payload = build_key_ratios_from_config(stock_obj)
-            render_key_ratios_card(key_ratios_payload)
-
-        with tab_news:
-            st.markdown("#### News")
-            items_html = _news_items_html(stock_obj)
-            st.markdown(items_html, unsafe_allow_html=True)
-
-        with tab_officers:
-            st.markdown("#### Officers")
-            officers = getattr(stock_obj, "officers", None) or getattr(stock_obj, "company_officers", None)
-            if isinstance(officers, list) and officers:
-                for off in officers:
-                    if isinstance(off, dict):
-                        name = off.get("name") or "—"
-                        title = off.get("title") or off.get("position") or ""
-                    elif isinstance(off, (list, tuple)):
-                        name = off[0] if len(off) > 0 else "—"
-                        title = off[1] if len(off) > 1 else ""
-                    else:
-                        continue
-                    st.markdown(f"- **{name}** — {title}")
-            else:
-                st.caption("No officer information available.")
-
-        with tab_about:
-            about_text = getattr(stock_obj, "company_summary", None) or "No company summary available."
-            st.markdown("#### About")
-            st.markdown(f"<div style='opacity:.95; line-height:1.6;'>{about_text}</div>", unsafe_allow_html=True)
-
-    with tab_data:
-        # Prepare fact sheet data once
-        prepared_fact_data = prepare_fact_sheet_data(stock_obj)
-
-        # Section 1: Basic Information
-        render_details_basic_information(prepared_fact_data)
-        st.markdown("---")
-
-        # Section 2: Time Series Data
-        render_details_time_series(prepared_fact_data)
-
-    with tab_valuation:
-        # Valuation Methods
-        render_details_valuation(fair_values)
-
-    with tab_evaluation:
-        # Evaluation Criteria
-        render_details_evaluation(evaluation_payload)
-
-    with tab_prompts:
-        st.subheader("Prompt")
-        st.caption(
-            "Copy and paste the Prompt to your AI to generate the final report. Enable reasoning and web search. Gemini 2.5 Pro is highly recommended.")
-        if st.session_state.get("generated_prompt_text"):
-            st.code(st.session_state["generated_prompt_text"], language=None)
-        else:
-            st.info("No prompt yet. Use the **Generate Prompt** button in the sidebar under **Fiscal Report URLs**.")
-
+    # Manual tab - always shown, even without data
     with tab_manual:
         from utils.how_to_use import MANUAL_CONTENT
         st.markdown(MANUAL_CONTENT)
+
+    # Check if data is loaded for other tabs
+    data_loaded = (st.session_state.stock is not None and st.session_state.fair_value_payload is not None)
+
+    with tab_overview:
+        if not data_loaded:
+            st.info("👈 Enter a ticker in the sidebar and click **Run** to view company overview and analysis.")
+        else:
+            # Row 1: Price Chart + Fair Value Table
+            col_price_chart, col_fair_value = st.columns([0.6, 0.4], gap="large")
+
+            with col_price_chart:
+                st.markdown("#### Historical Price since 10-yr Ago")
+                price_df = getattr(stock_obj, "prices", None)
+                try:
+                    if hasattr(stock_obj, "get_prices_series"):
+                        price_df = stock_obj.get_prices_series()
+                except Exception:
+                    pass
+                if isinstance(price_df, pd.DataFrame) and "Close" in price_df.columns and not price_df.empty:
+                    chart = build_price_line_chart(price_df.tail(3650 + 30), height=350,
+                                                   margin=dict(l=5, r=5, t=5, b=5))
+                    st.plotly_chart(chart, use_container_width=True)
+                else:
+                    st.caption("No price data available.")
+
+            with col_fair_value:
+                current_price = getattr(stock_obj, "current_price", np.nan) or np.nan
+                render_fair_value_table_card(current_price, fair_values)
+
+            st.markdown("---")
+
+            # Row 2: Radar Chart + Evaluation Checklist
+            col_radar_chart, col_checklist = st.columns([0.6, 0.4], gap="large")
+
+            with col_radar_chart:
+                st.markdown("#### Evaluation Snowflakes")
+                category_scores = compute_category_scores_for_radar(evaluation_payload)
+                radar_labels = ["past", "present", "future", "health", "dividend", "macroeconomics"]
+                radar_values = [category_scores.get(k, 0.0) for k in radar_labels]
+                radar_fig = build_radar_chart(radar_labels, radar_values, height=350, edge_pad=0.10,
+                                              margin=dict(l=5, r=5, t=5))
+                st.plotly_chart(radar_fig, use_container_width=True)
+
+            with col_checklist:
+                render_evaluation_checklist_card(evaluation_payload, CRITERION)
+
+            # Row 3: Tabbed section with Key Ratios, News, Officers, About
+            tab_key_ratios, tab_news, tab_officers, tab_about = st.tabs(["Key Ratios", "News", "Officers", "About"])
+
+            with tab_key_ratios:
+                key_ratios_payload = (payload or {}).get("key_ratios", [])
+                if not key_ratios_payload:
+                    key_ratios_payload = build_key_ratios_from_config(stock_obj)
+                render_key_ratios_card(key_ratios_payload)
+
+            with tab_news:
+                st.markdown("#### News")
+                items_html = _news_items_html(stock_obj)
+                st.markdown(items_html, unsafe_allow_html=True)
+
+            with tab_officers:
+                st.markdown("#### Officers")
+                officers = getattr(stock_obj, "officers", None) or getattr(stock_obj, "company_officers", None)
+                if isinstance(officers, list) and officers:
+                    for off in officers:
+                        if isinstance(off, dict):
+                            name = off.get("name") or "—"
+                            title = off.get("title") or off.get("position") or ""
+                        elif isinstance(off, (list, tuple)):
+                            name = off[0] if len(off) > 0 else "—"
+                            title = off[1] if len(off) > 1 else ""
+                        else:
+                            continue
+                        st.markdown(f"- **{name}** — {title}")
+                else:
+                    st.caption("No officer information available.")
+
+            with tab_about:
+                about_text = getattr(stock_obj, "company_summary", None) or "No company summary available."
+                st.markdown("#### About")
+                st.markdown(f"<div style='opacity:.95; line-height:1.6;'>{about_text}</div>",
+                            unsafe_allow_html=True)
+
+    with tab_data:
+        if not data_loaded:
+            st.info("👈 Enter a ticker in the sidebar and click **Run** to view financial data points.")
+        else:
+            # Prepare fact sheet data once
+            prepared_fact_data = prepare_fact_sheet_data(stock_obj)
+
+            # Section 1: Basic Information
+            render_details_basic_information(prepared_fact_data)
+            st.markdown("---")
+
+            # Section 2: Time Series Data
+            render_details_time_series(prepared_fact_data)
+
+    with tab_valuation:
+        if not data_loaded:
+            st.info("👈 Enter a ticker in the sidebar and click **Run** to view valuation methods.")
+        else:
+            # Valuation Methods
+            render_details_valuation(fair_values)
+
+    with tab_evaluation:
+        if not data_loaded:
+            st.info("👈 Enter a ticker in the sidebar and click **Run** to view investment criteria evaluation.")
+        else:
+            # Evaluation Criteria
+            render_details_evaluation(evaluation_payload)
+
+    with tab_prompts:
+        if not data_loaded:
+            st.info("👈 Enter a ticker in the sidebar and click **Run** to generate prompts.")
+        else:
+            st.subheader("Prompt")
+            st.caption(
+                "Copy and paste the Prompt to your AI to generate the final report. Enable reasoning and web search. Gemini 2.5 Pro is highly recommended.")
+            if st.session_state.get("generated_prompt_text"):
+                st.code(st.session_state["generated_prompt_text"], language=None)
+            else:
+                st.info(
+                    "No prompt yet. Use the **Generate Prompt** button in the sidebar under **Fiscal Report URLs**.")
 
 
 if __name__ == "__main__":
