@@ -91,9 +91,11 @@ The system auto-calculates parameters, but you can override any value to reflect
 ### Step 4: Generate Your AI Analyst Report
 **Get a comprehensive equity research report written by AI:**
 
-Exanoke report:
+Example report:
 - FIVN: [Gemini 2.5 Flash](https://g.co/gemini/share/644f7b7cf0b5)
+- FIVN: [Claude 4.5 Sonnet](https://claude.ai/share/a4780e70-bf12-4a2a-b484-2802ca53e6d9)
 - CPRX: [Gemini 2.5 Flash](https://g.co/gemini/share/45158ac2bf0d)
+- CPRX: [Claude 4.5 Sonnet](https://claude.ai/share/a4780e70-bf12-4a2a-b484-2802ca53e6d9)
 - INMB: [Gemini 2.5 Flash](https://g.co/gemini/share/076cdc65f4aa)
 
 1. **Find recent fiscal reports online:**
@@ -112,7 +114,7 @@ Exanoke report:
    - Copy the entire prompt text
 
 4. **Get your AI report:**
-   - Paste the prompt into Gemini 2.5 Pro (recommended) or Claude
+   - Paste the prompt into Claude 4.5 Sonnet > Gemini 2.5 Pro/Flash > GPT-5
    - Enable "deep thinking" or "reasoning" mode if available
    - Enable web search for latest news context
    - The AI will generate a detailed investment report with:
